@@ -9,9 +9,30 @@
 end::Bot::Bot(std::string instance_dir) : end::Bot{instance_dir, true} {}
 
 end::Bot::Bot(std::string instance_dir, bool run_discord)
-    : instance_dir_{instance_dir}, run_discord_{run_discord} {
+    : instance_dir_{instance_dir},
+      run_discord_{run_discord},
+      discord_bot_{std::string{GetToken()}} {
   BuildInstanceDir();
-  LoadToken();
+
+  if (run_discord_) {
+    discord_bot_.on_log(end::Log::DppLogger());
+
+    discord_bot_.on_slashcommand([](const dpp::slashcommand_t& event) {
+      if (event.command.get_command_name() == "ping") {
+        event.reply("Pong!");
+      }
+    });
+
+    discord_bot_.on_ready(
+        [&discord_bot_ = discord_bot_](const dpp::ready_t& event) {
+          if (dpp::run_once<struct register_bot_commands>()) {
+            discord_bot_.global_command_create(
+                dpp::slashcommand("ping", "Ping pong!", discord_bot_.me.id));
+          }
+        });
+
+    discord_bot_.start(dpp::st_wait);
+  }
 }
 
 bool end::Bot::LoadToken() {
@@ -35,7 +56,10 @@ bool end::Bot::LoadToken() {
   return true;
 }
 
-std::string_view end::Bot::GetToken() { return token_; }
+std::string_view end::Bot::GetToken() {
+  if (token_ == "") LoadToken();
+  return token_;
+}
 
 bool end::Bot::BuildInstanceDir() {
   // don't cry, it's just a harmless little macro

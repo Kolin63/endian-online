@@ -1,6 +1,8 @@
 #ifndef ENDIAN_BOT_HPP_
 #define ENDIAN_BOT_HPP_
 
+#include <dpp/dpp.h>
+
 #include <string>
 #include <string_view>
 
@@ -25,6 +27,8 @@ class Bot {
   std::string instance_dir_{};
   bool run_discord_{true};
   std::string token_{};
+
+  dpp::cluster discord_bot_;
 };
 
 }  // namespace end
