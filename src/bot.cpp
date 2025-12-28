@@ -62,6 +62,7 @@ std::string_view end::Bot::GetToken() {
 }
 
 bool end::Bot::BuildInstanceDir() {
+  Log::Info("Using instance directory " + instance_dir_);
   // don't cry, it's just a harmless little macro
 #define mkdir_helper(path)                                 \
   if (!std::filesystem::exists(path)) {                    \
