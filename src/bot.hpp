@@ -1,7 +1,7 @@
 #ifndef ENDIAN_BOT_HPP_
 #define ENDIAN_BOT_HPP_
 
-#include <dpp/dpp.h>
+#include <dpp/cluster.h>
 
 #include <string>
 #include <string_view>

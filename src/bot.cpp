@@ -1,5 +1,7 @@
 #include "bot.hpp"
 
+#include <dpp/dpp.h>
+
 #include <filesystem>
 #include <fstream>
 #include <string>
