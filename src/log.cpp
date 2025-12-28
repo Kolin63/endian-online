@@ -70,8 +70,7 @@ std::function<void(const dpp::log_t&)> end::Log::DppLogger() {
     end::Message::Severity sev{};
     switch (event.severity) {
       case dpp::ll_trace:
-        sev = end::Message::trace;
-        break;
+        return;
       case dpp::ll_debug:
         sev = end::Message::debug;
         break;
