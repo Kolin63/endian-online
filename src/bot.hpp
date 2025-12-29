@@ -14,10 +14,19 @@ class Bot {
   explicit Bot(std::string instance_dir);
   Bot(std::string instance_dir, bool run_discord);
 
+  std::string_view GetInstanceDir() const;
+
+  bool GetRunDiscord() const;
+  dpp::cluster& GetDiscordBot();
+  const dpp::cluster& GetDiscordBot() const;
+
   // loads the bot token from <instance_dir>/token.txt
   // returns true on success, false on failure
   bool LoadToken();
   std::string_view GetToken();
+  std::string_view GetToken() const;
+
+  static inline Bot* global_bot{nullptr};
 
  private:
   // makes sure that the instance directory is properly set up

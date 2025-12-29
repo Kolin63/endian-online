@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <string_view>
 
 #include "log.hpp"
 
@@ -63,6 +64,8 @@ std::string_view end::Bot::GetToken() {
   return token_;
 }
 
+std::string_view end::Bot::GetToken() const { return token_; }
+
 bool end::Bot::BuildInstanceDir() {
   Log::Info("Using instance directory " + instance_dir_);
   // don't cry, it's just a harmless little macro
@@ -89,3 +92,9 @@ bool end::Bot::BuildInstanceDir() {
 
   return true;
 }
+
+std::string_view end::Bot::GetInstanceDir() const { return instance_dir_; }
+
+bool end::Bot::GetRunDiscord() const { return run_discord_; }
+dpp::cluster& end::Bot::GetDiscordBot() { return discord_bot_; }
+const dpp::cluster& end::Bot::GetDiscordBot() const { return discord_bot_; }
