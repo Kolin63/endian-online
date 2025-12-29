@@ -16,12 +16,14 @@ class Registry {
   const std::map<std::string, T>& GetValues() const;
   const T& GetValue(std::string_view key) const;
 
-  void InsertValue(std::string_view key, const T& value);
-  void InsertValue(std::string_view key, const T&& value);
+  bool InsertValue(std::string_view key, const T& value);
+  bool InsertValue(std::string_view key, const T&& value);
 
   void Clear();
 
  private:
+  static bool IsValidKey(std::string_view key);
+
   std::string_view name_{};
   std::map<std::string, T> values_{};
 };
