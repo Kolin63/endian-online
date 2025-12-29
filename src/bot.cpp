@@ -14,7 +14,7 @@ end::Bot::Bot(std::string instance_dir) : end::Bot{instance_dir, true} {}
 end::Bot::Bot(std::string instance_dir, bool run_discord)
     : instance_dir_{instance_dir},
       run_discord_{run_discord},
-      discord_bot_{std::string{GetToken()}} {
+      discord_bot_{GetToken()} {
   BuildInstanceDir();
 
   if (run_discord_) {
@@ -59,12 +59,12 @@ bool end::Bot::LoadToken() {
   return true;
 }
 
-std::string_view end::Bot::GetToken() {
+const std::string& end::Bot::GetToken() {
   if (token_ == "") LoadToken();
   return token_;
 }
 
-std::string_view end::Bot::GetToken() const { return token_; }
+const std::string& end::Bot::GetToken() const { return token_; }
 
 bool end::Bot::BuildInstanceDir() {
   Log::Info("Using instance directory " + instance_dir_);
@@ -93,7 +93,7 @@ bool end::Bot::BuildInstanceDir() {
   return true;
 }
 
-std::string_view end::Bot::GetInstanceDir() const { return instance_dir_; }
+const std::string& end::Bot::GetInstanceDir() const { return instance_dir_; }
 
 bool end::Bot::GetRunDiscord() const { return run_discord_; }
 dpp::cluster& end::Bot::GetDiscordBot() { return discord_bot_; }

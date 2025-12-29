@@ -4,7 +4,6 @@
 #include <dpp/cluster.h>
 
 #include <string>
-#include <string_view>
 
 namespace end {
 
@@ -14,7 +13,7 @@ class Bot {
   explicit Bot(std::string instance_dir);
   Bot(std::string instance_dir, bool run_discord);
 
-  std::string_view GetInstanceDir() const;
+  const std::string& GetInstanceDir() const;
 
   bool GetRunDiscord() const;
   dpp::cluster& GetDiscordBot();
@@ -23,8 +22,8 @@ class Bot {
   // loads the bot token from <instance_dir>/token.txt
   // returns true on success, false on failure
   bool LoadToken();
-  std::string_view GetToken();
-  std::string_view GetToken() const;
+  const std::string& GetToken();
+  const std::string& GetToken() const;
 
   static inline Bot* global_bot{nullptr};
 
