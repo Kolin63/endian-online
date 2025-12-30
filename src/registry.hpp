@@ -3,7 +3,6 @@
 
 #include <map>
 #include <string>
-#include <string_view>
 
 #include "log.hpp"
 
@@ -13,26 +12,18 @@ template <typename T>
 class Registry {
  public:
   // name is for debugging and logging purposes only
-  explicit Registry(std::string_view name) : name_{name} {
+  explicit Registry(const std::string& name, bool has_namespace = true)
+      : name_{name}, has_namespace_{has_namespace} {
     Log::Info("Creating registry " + std::string{name_});
   }
 
   const std::map<std::string, T>& GetValues() const { return values_; }
-  const T& GetValue(std::string_view key) const { return values_[key]; }
+  T& GetValue(const std::string& key) { return values_[key]; }
 
-  bool InsertValue(std::string_view key, const T& value) {
-    if (!IsValidKey(key)) return false;
+  bool InsertValue(const std::string& key, const T& value) {
+    if (!IsValidKey(key, has_namespace_)) return false;
     values_[key] = value;
-    Log::Info("Inserting " + std::string{key} + " to registry " +
-              std::string{name_});
-    return true;
-  }
-
-  bool InsertValue(std::string_view key, const T&& value) {
-    if (!IsValidKey(key)) return false;
-    values_[key] = value;
-    Log::Info("Inserting " + std::string{key} + " to registry " +
-              std::string{name_});
+    Log::Info("Inserting " + key + " to registry " + name_);
     return true;
   }
 
@@ -42,12 +33,12 @@ class Registry {
   }
 
  private:
-  static bool IsValidKey(std::string_view key) {
+  static bool IsValidKey(const std::string& key, bool has_namespace) {
     // true if iterating over the namespace
     bool in_namespace{true};
     for (char c : key) {
       if (c == ':') {
-        if (!in_namespace) return false;
+        if (!in_namespace || !has_namespace) return false;
         in_namespace = false;
       } else if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
                    ('0' <= c && c <= '9'))) {
@@ -55,11 +46,12 @@ class Registry {
       }
     }
 
-    if (in_namespace) return false;
+    if (in_namespace && has_namespace) return false;
     return true;
   }
 
-  std::string_view name_{};
+  std::string name_{};
+  bool has_namespace_{true};
   std::map<std::string, T> values_{};
 };
 
