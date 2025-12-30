@@ -8,6 +8,7 @@
 #include <string_view>
 
 #include "log.hpp"
+#include "registry_manager.hpp"
 
 end::Bot::Bot(std::string instance_dir) : end::Bot{instance_dir, true} {}
 
@@ -17,23 +18,22 @@ end::Bot::Bot(std::string instance_dir, bool run_discord)
       discord_bot_{GetToken()} {
   BuildInstanceDir();
 
+  discord_bot_.on_log(end::Log::DppLogger());
+
+  discord_bot_.on_slashcommand([](const dpp::slashcommand_t& event) {
+    if (event.command.get_command_name() == "ping") {
+      event.reply("Pong!");
+    }
+  });
+
+  discord_bot_.on_ready(
+      [&discord_bot_ = discord_bot_](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+          end::RegistryManager::RegisterDiscordCommands();
+        }
+      });
+
   if (run_discord_) {
-    discord_bot_.on_log(end::Log::DppLogger());
-
-    discord_bot_.on_slashcommand([](const dpp::slashcommand_t& event) {
-      if (event.command.get_command_name() == "ping") {
-        event.reply("Pong!");
-      }
-    });
-
-    discord_bot_.on_ready(
-        [&discord_bot_ = discord_bot_](const dpp::ready_t& event) {
-          if (dpp::run_once<struct register_bot_commands>()) {
-            discord_bot_.global_command_create(
-                dpp::slashcommand("ping", "Ping pong!", discord_bot_.me.id));
-          }
-        });
-
     discord_bot_.start(dpp::st_wait);
   }
 }
@@ -89,6 +89,7 @@ bool end::Bot::BuildInstanceDir() {
 
   mkdir_helper(instance_dir_);
   touch_helper(std::string{instance_dir_ + "/token.txt"}, "<BOT TOKEN>");
+  mkdir_helper(std::string{instance_dir_ + "/mods"});
 
   return true;
 }

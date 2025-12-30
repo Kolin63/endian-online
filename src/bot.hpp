@@ -25,8 +25,6 @@ class Bot {
   const std::string& GetToken();
   const std::string& GetToken() const;
 
-  static inline Bot* global_bot{nullptr};
-
  private:
   // makes sure that the instance directory is properly set up
   // returns true on success, false on failure
