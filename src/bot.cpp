@@ -32,10 +32,6 @@ end::Bot::Bot(std::string instance_dir, bool run_discord)
           end::RegistryManager::RegisterDiscordCommands();
         }
       });
-
-  if (run_discord_) {
-    discord_bot_.start(dpp::st_wait);
-  }
 }
 
 bool end::Bot::LoadToken() {
@@ -92,6 +88,12 @@ bool end::Bot::BuildInstanceDir() {
   mkdir_helper(std::string{instance_dir_ + "/mods"});
 
   return true;
+}
+
+void end::Bot::StartDiscordBot() {
+  if (run_discord_) {
+    discord_bot_.start(dpp::st_wait);
+  }
 }
 
 const std::string& end::Bot::GetInstanceDir() const { return instance_dir_; }

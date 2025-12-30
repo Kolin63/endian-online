@@ -18,5 +18,8 @@ int main(int argc, char** argv) {
 
   end::ModLoader::LoadMods();
 
+  // doesnt start if run discord is false
+  endbot.StartDiscordBot();
+
   return 0;
 }

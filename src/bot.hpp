@@ -18,6 +18,7 @@ class Bot {
   bool GetRunDiscord() const;
   dpp::cluster& GetDiscordBot();
   const dpp::cluster& GetDiscordBot() const;
+  void StartDiscordBot();
 
   // loads the bot token from <instance_dir>/token.txt
   // returns true on success, false on failure
