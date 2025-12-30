@@ -9,7 +9,7 @@ namespace end {
 
 class RegistryManager {
  public:
-  static inline Registry<dpp::slashcommand> command_reg{"command_reg"};
+  static inline Registry<dpp::slashcommand> command_reg{"command_reg", false};
 
   static void RegisterDiscordCommands();
 };

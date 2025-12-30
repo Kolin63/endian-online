@@ -14,7 +14,11 @@ class ModLoader {
   static void LoadData(const std::string& mod_name);
   static void LoadDataNamespace(const std::string& mod_name,
                                 const std::string& namespace_name);
-  static void LoadCommands();
+  static void LoadCommands(const std::string& mod_name,
+                           const std::string& namespace_name);
+  static void LoadCommand(const std::string& mod_name,
+                          const std::string& namespace_name,
+                          const std::string& cmd_name);
 };
 
 }  // namespace end
