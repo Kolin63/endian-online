@@ -46,8 +46,12 @@ bool end::Bot::LoadToken() {
 
   fs >> token_;
 
-  if (fs.fail() || token_ == "") {
-    Log::Print("There was a problem with trying to read from the token file.");
+  if (token_.empty()) {
+    Log::Critical(token_location + " is empty");
+    return false;
+  } else if (fs.fail()) {
+    Log::Critical("There was a problem with trying to read from " +
+                  token_location);
     return false;
   }
 
