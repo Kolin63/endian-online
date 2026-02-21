@@ -9,6 +9,7 @@ int main(int argc, char** argv) {
 
   struct bot* bot = malloc(sizeof(struct bot));
   bot_init(bot, &cli_args);
+  bot_start(bot);
 
   free(bot);
 

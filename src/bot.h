@@ -13,4 +13,7 @@ struct bot {
 
 void bot_init(struct bot* bot, struct cli_args* cli_args);
 
+struct bot* bot_get_global();
+void bot_start(struct bot* bot);
+
 #endif

@@ -9,6 +9,8 @@
 
 #include "cli_args.h"
 
+static struct bot* global_bot;
+
 void on_ready(struct discord* client, const struct discord_ready* event) {
   struct discord_create_global_application_command params = {
       .name = "ping", .description = "Ping command!"};
@@ -101,12 +103,14 @@ void bot_init(struct bot* bot, struct cli_args* cli_args) {
       logmod_logger_set_quiet(
           logmod_get_logger(discord_get_logmod(bot->discord_bot), "RATELIMIT"),
           1);
-
-      logmod_log(INFO, logger, "Hello");
     }
 
     discord_set_on_ready(bot->discord_bot, &on_ready);
     discord_set_on_interaction_create(bot->discord_bot, &on_interaction);
-    discord_run(bot->discord_bot);
+    global_bot = bot;
   }
 }
+
+struct bot* bot_get_global() { return global_bot; }
+
+void bot_start(struct bot* bot) { discord_run(bot->discord_bot); }
