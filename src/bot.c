@@ -99,6 +99,8 @@ void bot_init(struct bot* bot, struct cli_args* cli_args) {
     logmod_logger_set_quiet(
         logmod_get_logger(discord_get_logmod(bot->discord_bot), "RATELIMIT"),
         1);
+    logmod_logger_set_quiet(
+        logmod_get_logger(discord_get_logmod(bot->discord_bot), "REFCOUNT"), 1);
   }
 
   discord_set_on_ready(bot->discord_bot, &on_ready);
