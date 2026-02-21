@@ -2,7 +2,6 @@
 #define ENDIAN_CLI_ARGS_H_
 
 struct cli_args {
-  bool run_discord;
   bool default_root;
   bool verbose;
   char instance_dir[128];

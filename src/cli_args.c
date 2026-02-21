@@ -6,11 +6,10 @@
 #include <string.h>
 
 void print_usage(const char* program_name) {
-  printf("Usage: %s [-drv] <instance_name>\n", program_name);
+  printf("Usage: %s [-rv] <instance_name>\n", program_name);
 }
 
 void cli_args_parse(int argc, char** argv, struct cli_args* out) {
-  out->run_discord = true;
   out->default_root = true;
   out->verbose = false;
   strcpy(out->instance_dir, "");
@@ -21,9 +20,6 @@ void cli_args_parse(int argc, char** argv, struct cli_args* out) {
     if (argv[i][0] == '-') {  // a flag
       for (size_t j = 1; j < strlen(argv[i]); j++) {
         switch (argv[i][j]) {
-        case 'd':
-          out->run_discord = false;
-          break;
         case 'r':
           out->default_root = false;
           break;
