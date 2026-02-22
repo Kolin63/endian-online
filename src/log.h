@@ -4,6 +4,8 @@
 #define LOGMOD_STATIC
 #include <concord/logmod.h>
 
+#include "bot.h"
+
 #define log_log(level, ...)                                                    \
   logmod_log(level,                                                            \
              logmod_get_logger(                                                \
