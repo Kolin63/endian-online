@@ -9,6 +9,7 @@
 #include "bot.h"
 #include "fileio.h"
 #include "log.h"
+#include "registry_manager.h"
 
 void mod_loader_load_command(const struct discord_ready* event, char* mod_name,
                              char* cmd_name) {
@@ -36,6 +37,8 @@ void mod_loader_load_command(const struct discord_ready* event, char* mod_name,
 
   free(fileio.buf);
 
+  registry_add(registry_manager_get_command_registry(), params.name,
+               (void*)&params);
   discord_create_global_application_command(
       bot_get_global()->discord_bot, event->application->id, &params, NULL);
   log_info("Loading command %s from mod %s", params.name, mod_name);

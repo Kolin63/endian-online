@@ -6,6 +6,7 @@
 #include "bot.h"
 #include "cli_args.h"
 #include "log.h"
+#include "registry_manager.h"
 
 static bool should_exit = 0;
 
@@ -23,6 +24,7 @@ void* cleanup(void*) {
 
   free(cli_args);
   free(bot);
+  registry_manager_cleanup();
   printf("Done\n");
 
   exit(EXIT_SUCCESS);
@@ -36,6 +38,7 @@ int main(int argc, char** argv) {
   pthread_t exit_thread;
   pthread_create(&exit_thread, NULL, cleanup, NULL);
 
+  registry_manager_init();
   cli_args = malloc(sizeof(struct cli_args));
   bot = malloc(sizeof(struct bot));
 
