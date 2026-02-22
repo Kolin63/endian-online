@@ -12,6 +12,8 @@
 
 static struct bot* global_bot;
 
+bool should_exit = false;
+
 void on_ready(struct discord*, const struct discord_ready* event) {
   mod_loader_load_mods(event);
 }
@@ -27,6 +29,15 @@ void on_interaction(struct discord* client,
         .data = &(struct discord_interaction_callback_data){.content = "pong"}};
     discord_create_interaction_response(client, event->id, event->token,
                                         &params, NULL);
+  }
+  if (strcmp(event->data->name, "stop") == 0) {
+    struct discord_interaction_response params = {
+        .type = DISCORD_INTERACTION_CHANNEL_MESSAGE_WITH_SOURCE,
+        .data = &(struct discord_interaction_callback_data){.content =
+                                                                "Stopping..."}};
+    discord_create_interaction_response(client, event->id, event->token,
+                                        &params, NULL);
+    should_exit = true;
   }
 }
 
@@ -109,3 +120,5 @@ void bot_init(struct bot* bot, struct cli_args* cli_args) {
 struct bot* bot_get_global() { return global_bot; }
 
 void bot_start(struct bot* bot) { discord_run(bot->discord_bot); }
+
+bool bot_should_exit() { return should_exit; }

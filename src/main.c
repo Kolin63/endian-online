@@ -13,7 +13,7 @@ static struct cli_args* cli_args;
 static struct bot* bot;
 
 void* cleanup(void*) {
-  while (!should_exit) {
+  while (!should_exit && !bot_should_exit()) {
     ;
   }
 
