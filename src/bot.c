@@ -8,14 +8,12 @@
 #include <time.h>
 
 #include "cli_args.h"
+#include "mod_loader.h"
 
 static struct bot* global_bot;
 
-void on_ready(struct discord* client, const struct discord_ready* event) {
-  struct discord_create_global_application_command params = {
-      .name = "ping", .description = "Ping command!"};
-  discord_create_global_application_command(client, event->application->id,
-                                            &params, NULL);
+void on_ready(struct discord*, const struct discord_ready* event) {
+  mod_loader_load_mods(event);
 }
 
 void on_interaction(struct discord* client,
