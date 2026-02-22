@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := $(CFLAGS) -std=c23 -Wall -Wextra -Wpedantic -MMD -MP -DLOG_USE_COLOR
+CFLAGS := $(CFLAGS) -std=c23 -Wall -Wextra -Wpedantic -MMD -MP -DLOG_USE_COLOR -D_POSIX_C_SOURCE=200809L
 LDFLAGS := -pthread -lcjson -ldiscord -lcurl
 
 SRC_DIR := src
