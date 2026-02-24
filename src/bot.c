@@ -63,6 +63,7 @@ void bot_init(struct cli_args* cli_args) {
   }
 
   fgets(token, sizeof(token), token_file);
+  fclose(token_file);
 
   if (strlen(token) == 0) {
     printf("Bot token is of length 0");

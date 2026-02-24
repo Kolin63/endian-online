@@ -36,6 +36,7 @@ void mod_loader_load_command(const struct discord_ready* event, char* mod_name,
                                                       fileio.buf_size, &params);
 
   free(fileio.buf);
+  fclose(file);
 
   registry_add(registry_manager_get_command_registry(), params.name,
                (void*)&params);
@@ -67,6 +68,7 @@ void mod_loader_load_commands(const struct discord_ready* event,
     }
     mod_loader_load_command(event, mod_name, dirent->d_name);
   }
+  closedir(dir);
 }
 
 void mod_loader_load_data(const struct discord_ready* event, char* mod_name) {
@@ -99,4 +101,5 @@ void mod_loader_load_mods(const struct discord_ready* event) {
     }
     mod_loader_load_mod(event, dirent->d_name);
   }
+  closedir(dir);
 }
