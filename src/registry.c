@@ -30,8 +30,9 @@ void registry_add(struct registry* reg, const char* key, const void* val) {
   if (reg->length > 0) {
     size_t left = 0;
     size_t right = reg->length - 1;
-    size_t mid = left + (right - left) / 2;
+    size_t mid = 0;
     while (left <= right) {
+      size_t mid = left + (right - left) / 2;
       const int cmp = strcmp(reg->keys[mid], key);
       if (cmp < 0) {
         left = mid + 1;
@@ -64,7 +65,8 @@ void registry_add(struct registry* reg, const char* key, const void* val) {
     memmove(reg->keys + insert_index + 1, reg->keys + insert_index,
             (reg->length - insert_index - 1) * sizeof(char*));
     memmove((char*)reg->values + (insert_index + 1) * reg->val_size,
-            reg->values, (reg->length - insert_index - 1) * reg->val_size);
+            (char*)reg->values + (insert_index * reg->val_size),
+            (reg->length - insert_index - 1) * reg->val_size);
   }
 
   // move in the new key and value
