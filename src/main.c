@@ -8,7 +8,7 @@
 #include "log.h"
 #include "registry_manager.h"
 
-static bool should_exit = 0;
+static bool should_exit = false;
 
 static struct cli_args* cli_args;
 static struct bot* bot;
@@ -26,7 +26,6 @@ void* cleanup(void*) {
   printf("Done\n");
 
   exit(EXIT_SUCCESS);
-  pthread_exit(NULL);
 }
 
 void handle_exit() { should_exit = 1; }
