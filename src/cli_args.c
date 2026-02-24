@@ -43,7 +43,12 @@ void cli_args_parse(int argc, char** argv, struct cli_args* out) {
     char buf[128];
     strcpy(buf, out->instance_dir);
 #ifdef __linux__
-    strcpy(out->instance_dir, getenv("HOME"));
+    const char* home = getenv("HOME");
+    if (!home) {
+      printf("Error: could not get value of $HOME\n");
+      exit(EXIT_FAILURE);
+    }
+    strcpy(out->instance_dir, home);
     strcat(out->instance_dir, "/.local/share/endian/");
 #else
     static_assert(0, "Default root not supported on this OS");
