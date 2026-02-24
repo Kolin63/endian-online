@@ -20,11 +20,9 @@ void* cleanup(void*) {
 
   log_info("Stopping...");
 
-  discord_shutdown(bot_get_global()->discord_bot);
-
   free(cli_args);
-  free(bot);
   registry_manager_cleanup();
+  bot_cleanup();
   printf("Done\n");
 
   exit(EXIT_SUCCESS);
@@ -49,8 +47,8 @@ int main(int argc, char** argv) {
 
   cli_args_parse(argc, argv, cli_args);
 
-  bot_init(bot, cli_args);
-  bot_start(bot);
+  bot_init(cli_args);
+  bot_start();
 
   // this line should never execute, but it's here just in case
   pthread_join(exit_thread, NULL);

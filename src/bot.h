@@ -11,10 +11,11 @@ struct bot {
   struct discord* discord_bot;
 };
 
-void bot_init(struct bot* bot, struct cli_args* cli_args);
+void bot_init(struct cli_args* cli_args);
+void bot_cleanup();
 
 struct bot* bot_get_global();
-void bot_start(struct bot* bot);
+void bot_start();
 
 bool bot_should_exit();
 
