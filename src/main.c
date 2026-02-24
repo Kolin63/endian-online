@@ -33,12 +33,12 @@ void handle_exit() { should_exit = 1; }
 void handle_sigint(int) { handle_exit(); }
 
 int main(int argc, char** argv) {
-  pthread_t exit_thread;
-  pthread_create(&exit_thread, NULL, cleanup, NULL);
-
   registry_manager_init();
   cli_args = malloc(sizeof(struct cli_args));
   bot = malloc(sizeof(struct bot));
+
+  pthread_t exit_thread;
+  pthread_create(&exit_thread, NULL, cleanup, NULL);
 
   atexit(handle_exit);
   struct sigaction sa;
