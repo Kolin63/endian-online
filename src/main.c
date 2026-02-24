@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
   pthread_create(&exit_thread, NULL, cleanup, NULL);
 
   atexit(handle_exit);
-  struct sigaction sa;
+  struct sigaction sa = {0};
   sa.sa_handler = handle_sigint;
   sigaction(SIGINT, &sa, NULL);
 
