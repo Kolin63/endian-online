@@ -1,6 +1,11 @@
 include/*
 lib/*
-build/*
 .cache/*
 compile_commands.json
 server
+
+build/*
+CMakeCache.txt
+CMakeFiles/*
+Makefile
+cmake_install.cmake
