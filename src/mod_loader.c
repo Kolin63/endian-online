@@ -1,75 +1,12 @@
 #include "mod_loader.h"
 
 #include <concord/discord.h>
-#include <concord/discord_codecs.h>
 #include <dirent.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "bot.h"
-#include "fileio.h"
+#include "command.h"
 #include "log.h"
-#include "registry_manager.h"
-
-void load_command(const struct discord_ready* event, char* mod_name,
-                             char* cmd_name) {
-  char path[512];
-  strcpy(path, bot_get_global()->instance_dir);
-  strcat(path, "/mods/");
-  strcat(path, mod_name);
-  strcat(path, "/data/commands/");
-  strcat(path, cmd_name);
-
-  struct fileio fileio = {.buf = malloc(1), .buf_size = 1};
-  fileio.buf[0] = '\0';
-  FILE* file = fopen(path, "r");
-
-  if (!file) {
-    log_error("Could not open command file from %s at %s", mod_name, path);
-    return;
-  }
-
-  fileio_read_all(&fileio, file);
-
-  struct discord_create_global_application_command params = {};
-  discord_create_global_application_command_from_json(fileio.buf,
-                                                      fileio.buf_size, &params);
-
-  free(fileio.buf);
-  fclose(file);
-
-  registry_add(registry_manager_get_command_registry(), params.name,
-               (void*)&params);
-  discord_create_global_application_command(
-      bot_get_global()->discord_bot, event->application->id, &params, NULL);
-  log_info("Loading command %s from mod %s", params.name, mod_name);
-}
-
-void load_commands(const struct discord_ready* event,
-                              char* mod_name) {
-  char path[256];
-  strcpy(path, bot_get_global()->instance_dir);
-  strcat(path, "/mods/");
-  strcat(path, mod_name);
-  strcat(path, "/data/commands");
-
-  DIR* dir = opendir(path);
-  struct dirent* dirent;
-
-  if (!dir) {
-    log_error("Could not open commands folder from mod %s at %s", mod_name,
-              path);
-    return;
-  }
-
-  while ((dirent = readdir(dir)) != NULL) {
-    if (dirent->d_name[0] == '.') {
-      continue;
-    }
-    load_command(event, mod_name, dirent->d_name);
-  }
-  closedir(dir);
-}
 
 void load_data(const struct discord_ready* event, char* mod_name) {
   load_commands(event, mod_name);
