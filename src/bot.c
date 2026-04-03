@@ -12,7 +12,8 @@
 #include "mod_loader.h"
 
 static struct bot* global_bot = NULL;
-static FILE* log_file = NULL;
+static FILE* log_file_end = NULL;
+static FILE* log_file_concord = NULL;
 
 bool should_exit = false;
 
@@ -77,28 +78,42 @@ void bot_init(struct cli_args* cli_args) {
 
   global_bot->discord_bot = discord_init(token);
 
-  if (log_file == NULL) {
-    char log_file_path[256];
-    char log_time_name[64];
-    time_t rawtime;
-    struct tm* tm_time;
-    time(&rawtime);
-    tm_time = localtime(&rawtime);
-    strftime(log_time_name, sizeof(log_time_name), "/logs/%Y%m%e%H%M%S.log",
-             tm_time);
-    strcpy(log_file_path, global_bot->instance_dir);
-    strcat(log_file_path, log_time_name);
-    log_file = fopen(log_file_path, "w");
-  } else {
-    log_error("Global log file already initialized");
-  }
+  // open logging files
+  char log_time_name[128];
 
+  time_t rawtime;
+  struct tm* tm_time;
+  time(&rawtime);
+  tm_time = localtime(&rawtime);
+  strftime(log_time_name, sizeof(log_time_name), "/logs/%Y-%m-%e-%H:%M:%S",
+           tm_time);
+
+  char log_end_path[256];
+  char log_concord_path[256];
+
+  strcpy(log_end_path, global_bot->instance_dir);
+  strcat(log_end_path, log_time_name);
+  strcat(log_end_path, ".end.log");
+
+  strcpy(log_concord_path, global_bot->instance_dir);
+  strcat(log_concord_path, log_time_name);
+  strcat(log_concord_path, ".concord.log");
+
+  log_file_end = fopen(log_end_path, "w");
+  log_file_concord = fopen(log_concord_path, "w");
+
+  // setup logging from endian
+  log_add_fp(log_file_end, LOG_TRACE);
+
+  // setup logging from concord
   struct logmod_logger* logger =
       logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "CLIENT");
 
-  logmod_logger_set_logfile(logger, log_file);
+  logmod_logger_set_logfile(logger, log_file_concord);
   logmod_logger_set_quiet(logger, 0);
+#ifndef LOG_NO_USE_COLOR
   logmod_logger_set_color(logger, 1);
+#endif
 
   if (cli_args->verbose == 0) {
     logmod_logger_set_quiet(
@@ -140,7 +155,8 @@ void bot_init(struct cli_args* cli_args) {
 
 void bot_cleanup() {
   discord_shutdown(global_bot->discord_bot);
-  fclose(log_file);
+  fclose(log_file_end);
+  fclose(log_file_concord);
   free(global_bot);
 }
 
