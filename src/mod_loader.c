@@ -8,13 +8,13 @@
 #include "command.h"
 #include "log.h"
 
-void load_data(const struct discord_ready* event, char* mod_name) {
-  load_commands(event, mod_name);
+void data_load(const struct discord_ready* event, char* mod_name) {
+  command_load_from_mod(event, mod_name);
 }
 
-void load_mod(const struct discord_ready* event, char* mod_name) {
+void mod_load(const struct discord_ready* event, char* mod_name) {
   log_info("Loading mod %s", mod_name);
-  load_data(event, mod_name);
+  data_load(event, mod_name);
 }
 
 void mod_loader_load_mods(const struct discord_ready* event) {
@@ -36,7 +36,7 @@ void mod_loader_load_mods(const struct discord_ready* event) {
     if (dirent->d_name[0] == '.') {
       continue;
     }
-    load_mod(event, dirent->d_name);
+    mod_load(event, dirent->d_name);
   }
   closedir(dir);
 }

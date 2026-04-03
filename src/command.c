@@ -13,7 +13,7 @@
 #include "registry.h"
 #include "registry_manager.h"
 
-void strict_check_command_json(const cJSON* json, char* mod_name,
+void command_strict_check_json(const cJSON* json, char* mod_name,
                                char* cmd_name) {
   char template_path[512];
   strcpy(template_path, bot_get_global()->instance_dir);
@@ -54,7 +54,7 @@ void strict_check_command_json(const cJSON* json, char* mod_name,
   cJSON_Delete(template);
 }
 
-void load_command(const struct discord_ready* event, char* mod_name,
+void command_load(const struct discord_ready* event, char* mod_name,
                   char* cmd_name) {
   if (strcmp(cmd_name, "template.json") == 0) return;
 
@@ -80,7 +80,7 @@ void load_command(const struct discord_ready* event, char* mod_name,
   fileio_cleanup(fileio);
   fclose(file);
 
-  strict_check_command_json(json, mod_name, cmd_name);
+  command_strict_check_json(json, mod_name, cmd_name);
 
   // registry_add(registry_manager_get_command_registry(), params.name,
   //              (void*)&params);
@@ -89,7 +89,7 @@ void load_command(const struct discord_ready* event, char* mod_name,
   log_info("Loading command %s from mod %s", cmd_name, mod_name);
 }
 
-void load_commands(const struct discord_ready* event, char* mod_name) {
+void command_load_from_mod(const struct discord_ready* event, char* mod_name) {
   char path[256];
   strcpy(path, bot_get_global()->instance_dir);
   strcat(path, "/mods/");
@@ -109,7 +109,7 @@ void load_commands(const struct discord_ready* event, char* mod_name) {
     if (dirent->d_name[0] == '.') {
       continue;
     }
-    load_command(event, mod_name, dirent->d_name);
+    command_load(event, mod_name, dirent->d_name);
   }
   closedir(dir);
 }

@@ -3,6 +3,6 @@
 
 #include <concord/discord.h>
 
-void load_commands(const struct discord_ready* event, char* mod_name);
+void command_load_from_mod(const struct discord_ready* event, char* mod_name);
 
 #endif
