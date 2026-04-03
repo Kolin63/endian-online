@@ -11,7 +11,7 @@
 #include "log.h"
 #include "registry_manager.h"
 
-void mod_loader_load_command(const struct discord_ready* event, char* mod_name,
+void load_command(const struct discord_ready* event, char* mod_name,
                              char* cmd_name) {
   char path[512];
   strcpy(path, bot_get_global()->instance_dir);
@@ -45,7 +45,7 @@ void mod_loader_load_command(const struct discord_ready* event, char* mod_name,
   log_info("Loading command %s from mod %s", params.name, mod_name);
 }
 
-void mod_loader_load_commands(const struct discord_ready* event,
+void load_commands(const struct discord_ready* event,
                               char* mod_name) {
   char path[256];
   strcpy(path, bot_get_global()->instance_dir);
@@ -66,18 +66,18 @@ void mod_loader_load_commands(const struct discord_ready* event,
     if (dirent->d_name[0] == '.') {
       continue;
     }
-    mod_loader_load_command(event, mod_name, dirent->d_name);
+    load_command(event, mod_name, dirent->d_name);
   }
   closedir(dir);
 }
 
-void mod_loader_load_data(const struct discord_ready* event, char* mod_name) {
-  mod_loader_load_commands(event, mod_name);
+void load_data(const struct discord_ready* event, char* mod_name) {
+  load_commands(event, mod_name);
 }
 
-void mod_loader_load_mod(const struct discord_ready* event, char* mod_name) {
+void load_mod(const struct discord_ready* event, char* mod_name) {
   log_info("Loading mod %s", mod_name);
-  mod_loader_load_data(event, mod_name);
+  load_data(event, mod_name);
 }
 
 void mod_loader_load_mods(const struct discord_ready* event) {
@@ -99,7 +99,7 @@ void mod_loader_load_mods(const struct discord_ready* event) {
     if (dirent->d_name[0] == '.') {
       continue;
     }
-    mod_loader_load_mod(event, dirent->d_name);
+    load_mod(event, dirent->d_name);
   }
   closedir(dir);
 }
