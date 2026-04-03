@@ -5,8 +5,8 @@
  */
 #include "json_iterator.h"
 
-#include <stdlib.h>
 #include <assert.h>
+#include <stdlib.h>
 #ifndef JSON_ITERATOR_INCLUDE_COMMENT
 #include <string.h>
 #endif
@@ -73,7 +73,6 @@ struct json_iterator* json_iterate(struct json_iterator* iter) {
 #ifndef JSON_ITERATOR_INCLUDE_COMMENT
   // completely ignore anything with the key "comment"
   if (iter->json != NULL && iter->json->string != NULL &&
-      strlen(iter->json->string) == strlen("comment") &&
       strcmp(iter->json->string, "comment") == 0) {
     iter = json_iterator_skip_object(iter);
   }
