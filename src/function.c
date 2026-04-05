@@ -81,16 +81,10 @@ void function_load(const char* function_path, const char* mod_name,
     return;
   }
 
+  func.function = handle;
+
   if (registry_add(regman_get_function(), func.name, &func) == -1) {
     log_error("Function %s already registered", func.name);
+    return;
   }
-}
-
-void function_call(const char* clean_name) {
-  const struct function* func =
-      registry_ktov(regman_get_function(), clean_name);
-
-  const void (*handle)() = func->function;
-
-  handle();
 }

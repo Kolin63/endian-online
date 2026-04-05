@@ -10,6 +10,4 @@ struct function {
 void function_load(const char* function_path, const char* mod_name,
                    const char* file_name);
 
-void function_call(const char* function_name);
-
 #endif
