@@ -8,7 +8,7 @@
 #include "command.h"
 #include "log.h"
 
-void commands_load(const struct discord_ready* event, char* mod_name) {
+void commands_load(const struct discord_ready* event, const char* mod_name) {
   char path[256];
   strcpy(path, bot_get_global()->instance_dir);
   strcat(path, "/mods/");
@@ -33,11 +33,11 @@ void commands_load(const struct discord_ready* event, char* mod_name) {
   closedir(dir);
 }
 
-void data_load(const struct discord_ready* event, char* mod_name) {
+void data_load(const struct discord_ready* event, const char* mod_name) {
   commands_load(event, mod_name);
 }
 
-void mod_load(const struct discord_ready* event, char* mod_name) {
+void mod_load(const struct discord_ready* event, const char* mod_name) {
   log_info("Loading mod %s", mod_name);
   data_load(event, mod_name);
 }

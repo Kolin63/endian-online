@@ -18,7 +18,8 @@
 #include "regman.h"
 
 // returns amount of errors, 0 if ok
-int command_fillout(char* mod_name, char* cmd_name, cJSON* json,
+int command_fillout(const char* mod_name, const char* cmd_name,
+                    const cJSON* json,
                     struct discord_create_global_application_command* params) {
   int error = 0;
 
@@ -82,8 +83,8 @@ int command_fillout(char* mod_name, char* cmd_name, cJSON* json,
   return error;
 }
 
-void command_load(const struct discord_ready* event, char* mod_name,
-                  char* cmd_name) {
+void command_load(const struct discord_ready* event, const char* mod_name,
+                  const char* cmd_name) {
   if (strcmp(cmd_name, "template.json") == 0) return;
 
   char path[512];
