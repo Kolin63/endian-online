@@ -1,7 +1,10 @@
 #include "command.h"
 
 #include <concord/discord.h>
+#include <concord/discord_codecs.h>
 #include <dirent.h>
+#include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "bot.h"
@@ -54,6 +57,134 @@ void command_strict_check_json(const cJSON* json, char* mod_name,
   cJSON_Delete(template);
 }
 
+// returns amount of errors, 0 if ok
+int command_fillout(char* mod_name, char* cmd_name, cJSON* json,
+                    struct discord_create_global_application_command* params) {
+  int error = 0;
+
+  struct json_iterator* iter = json_iterator_init(json);
+
+  while (true) {
+    iter = json_iterate(iter);
+    if (iter->parent == NULL) break;
+    if (iter->json == NULL) continue;
+
+    const char* item_name = iter->json->string;
+
+    if (strcmp(item_name, "type") == 0) {
+      if (iter->json->type != cJSON_String) {
+        log_error("In command %s from mod %s, type must be string", cmd_name,
+                  mod_name);
+        error++;
+        continue;
+      }
+      if (iter->json->valuestring == NULL) {
+        log_error("In command %s from mod %s, type is NULL", cmd_name,
+                  mod_name);
+        error++;
+        continue;
+      }
+      const char* val = iter->json->valuestring;
+      if (strcmp(val, "CHAT_INPUT") == 0)
+        params->type = DISCORD_APPLICATION_CHAT_INPUT;
+      else if (strcmp(val, "USER") == 0)
+        params->type = DISCORD_APPLICATION_USER;
+      else if (strcmp(val, "MESSAGE") == 0)
+        params->type = DISCORD_APPLICATION_MESSAGE;
+      else {
+        log_error("In command %s from mod %s, unknown type %s", cmd_name,
+                  mod_name, val);
+        error++;
+        continue;
+      }
+    } else if (strcmp(item_name, "name") == 0) {
+      if (iter->json->type != cJSON_String) {
+        log_error("In command %s from mod %s, name must be string", cmd_name,
+                  mod_name);
+        error++;
+        continue;
+      }
+      if (iter->json->valuestring == NULL) {
+        log_error("In command %s from mod %s, name is NULL", cmd_name,
+                  mod_name);
+        error++;
+        continue;
+      }
+      int len = strlen(iter->json->valuestring);
+      if (len < 1 || len > 32) {
+        log_error("In command %s from mod %s, name is wrong size", cmd_name,
+                  mod_name);
+        error++;
+        continue;
+      }
+      params->name = iter->json->valuestring;
+    } else if (strcmp(item_name, "description") == 0) {
+      if (iter->json->type != cJSON_String) {
+        log_error("In command %s from mod %s, description must be string",
+                  cmd_name, mod_name);
+        error++;
+        continue;
+      }
+      if (iter->json->valuestring == NULL) {
+        log_error("In command %s from mod %s, description is NULL", cmd_name,
+                  mod_name);
+        error++;
+        continue;
+      }
+      int len = strlen(iter->json->valuestring);
+      if (len < 1 || len > 100) {
+        log_error("In command %s from mod %s, description is wrong size",
+                  cmd_name, mod_name);
+        error++;
+        continue;
+      }
+      params->description = iter->json->valuestring;
+    } else if (strcmp(item_name, "options") == 0) {
+      if (iter->json->type != cJSON_Array) {
+        log_error("In command %s from mod %s, options must be array", cmd_name,
+                  mod_name);
+        error++;
+        continue;
+      }
+      if (iter->json->child == NULL) {
+        log_error("In command %s from mod %s, options has no items", cmd_name,
+                  mod_name);
+        error++;
+        continue;
+      }
+      // TODO: load options
+      iter = json_iterator_skip_object(iter);
+    } else if (strcmp(item_name, "default_member_permissions") == 0) {
+      if (iter->json->type != cJSON_String) {
+        log_error(
+            "In command %s from mod %s, default_member_permissions must be "
+            "string",
+            cmd_name, mod_name);
+        error++;
+        continue;
+      }
+      if (iter->json->valuestring == NULL) {
+        log_error(
+            "In command %s from mod %s, default_member_permissions is NULL",
+            cmd_name, mod_name);
+        error++;
+        continue;
+      }
+      char* endptr = iter->json->valuestring;
+      errno = 0;
+      unsigned long long perms = strtoull(iter->json->valuestring, &endptr, 10);
+      if (errno != 0 || *endptr != '\0') {
+        log_error(
+            "In command %s from mod %s, error reading "
+            "default_member_permissions",
+            cmd_name, mod_name);
+      }
+      params->default_member_permissions = perms;
+    }
+  }
+  return error;
+}
+
 void command_load(const struct discord_ready* event, char* mod_name,
                   char* cmd_name) {
   if (strcmp(cmd_name, "template.json") == 0) return;
@@ -82,10 +213,13 @@ void command_load(const struct discord_ready* event, char* mod_name,
 
   command_strict_check_json(json, mod_name, cmd_name);
 
-  // registry_add(registry_manager_get_command_registry(), params.name,
-  //              (void*)&params);
-  // discord_create_global_application_command(
-  //     bot_get_global()->discord_bot, event->application->id, &params, NULL);
+  struct discord_create_global_application_command params;
+  if (command_fillout(mod_name, cmd_name, json, &params) != 0) return;
+
+  registry_add(registry_manager_get_command_registry(), params.name,
+               (void*)&params);
+  discord_create_global_application_command(
+      bot_get_global()->discord_bot, event->application->id, &params, NULL);
   log_info("Loading command %s from mod %s", cmd_name, mod_name);
 }
 
