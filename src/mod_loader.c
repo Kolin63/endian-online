@@ -2,19 +2,18 @@
 
 #include <concord/discord.h>
 #include <dirent.h>
-#include <string.h>
 
 #include "bot.h"
 #include "command.h"
 #include "log.h"
+#include "sds.h"
 
 #define DIRECTORY_LOAD(path, func)                                   \
   {                                                                  \
-    char fullpath[512];                                              \
-    strcpy(fullpath, bot_get_global()->instance_dir);                \
-    strcat(fullpath, "/mods/");                                      \
-    strcat(fullpath, mod_name);                                      \
-    strcat(fullpath, "/" path);                                      \
+    sds fullpath = sdsnew(bot_get_global()->instance_dir);           \
+    fullpath = sdscat(fullpath, "/mods/");                           \
+    fullpath = sdscat(fullpath, mod_name);                           \
+    fullpath = sdscat(fullpath, "/" path);                           \
                                                                      \
     DIR* dir = opendir(fullpath);                                    \
     struct dirent* dirent;                                           \
@@ -33,14 +32,14 @@
       func;                                                          \
     }                                                                \
     closedir(dir);                                                   \
+    sdsfree(fullpath);                                               \
   }
 
 void commands_load(const struct discord_ready* event, const char* mod_name) {
-  char path[256];
-  strcpy(path, bot_get_global()->instance_dir);
-  strcat(path, "/mods/");
-  strcat(path, mod_name);
-  strcat(path, "/data/commands");
+  sds path = sdsnew(bot_get_global()->instance_dir);
+  path = sdscat(path, "/mods/");
+  path = sdscat(path, mod_name);
+  path = sdscat(path, "/data/commands");
 
   DIR* dir = opendir(path);
   struct dirent* dirent;
@@ -58,6 +57,7 @@ void commands_load(const struct discord_ready* event, const char* mod_name) {
     command_load(event, mod_name, dirent->d_name);
   }
   closedir(dir);
+  sdsfree(path);
 }
 
 void data_load(const struct discord_ready* event, const char* mod_name) {
@@ -72,9 +72,8 @@ void mod_load(const struct discord_ready* event, const char* mod_name) {
 void mod_loader_load_mods(const struct discord_ready* event) {
   log_info("Loading mods!");
 
-  char path[256];
-  strcpy(path, bot_get_global()->instance_dir);
-  strcat(path, "/mods");
+  sds path = sdsnew(bot_get_global()->instance_dir);
+  path = sdscat(path, "/mods");
 
   DIR* dir = opendir(path);
   struct dirent* dirent;
@@ -91,4 +90,5 @@ void mod_loader_load_mods(const struct discord_ready* event) {
     mod_load(event, dirent->d_name);
   }
   closedir(dir);
+  sdsfree(path);
 }

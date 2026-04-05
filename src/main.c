@@ -20,7 +20,7 @@ void* cleanup(void*) {
 
   log_info("Stopping...");
 
-  free(cli_args);
+  cli_args_cleanup(cli_args);
   regman_cleanup();
   bot_cleanup();
   printf("Done\n");
@@ -31,9 +31,9 @@ void* cleanup(void*) {
 void handle_exit() { should_exit = 1; }
 void handle_sigint(int) { handle_exit(); }
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   regman_init();
-  cli_args = malloc(sizeof(struct cli_args));
+  cli_args = cli_args_init();
   bot = malloc(sizeof(struct bot));
 
   pthread_t exit_thread;

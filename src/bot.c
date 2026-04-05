@@ -10,6 +10,7 @@
 #include "cli_args.h"
 #include "log.h"
 #include "mod_loader.h"
+#include "sds.h"
 
 static struct bot* global_bot = NULL;
 static FILE* log_file_end = NULL;
@@ -52,9 +53,8 @@ void bot_init(struct cli_args* cli_args) {
   global_bot->instance_dir = cli_args->instance_dir;
 
   char token[128];
-  char token_file_path[128];
-  strcpy(token_file_path, global_bot->instance_dir);
-  strcat(token_file_path, "/token.txt");
+  sds token_file_path = sdsnew(global_bot->instance_dir);
+  token_file_path = sdscat(token_file_path, "/token.txt");
 
   FILE* token_file = fopen(token_file_path, "r");
 
@@ -78,6 +78,8 @@ void bot_init(struct cli_args* cli_args) {
 
   global_bot->discord_bot = discord_init(token);
 
+  sdsfree(token_file_path);
+
   // open logging files
   char log_time_name[128];
 
@@ -88,16 +90,13 @@ void bot_init(struct cli_args* cli_args) {
   strftime(log_time_name, sizeof(log_time_name), "/logs/%Y-%m-%d-%H:%M:%S",
            tm_time);
 
-  char log_end_path[256];
-  char log_concord_path[256];
+  sds log_end_path = sdsnew(global_bot->instance_dir);
+  log_end_path = sdscat(log_end_path, log_time_name);
+  log_end_path = sdscat(log_end_path, ".end.log");
 
-  strcpy(log_end_path, global_bot->instance_dir);
-  strcat(log_end_path, log_time_name);
-  strcat(log_end_path, ".end.log");
-
-  strcpy(log_concord_path, global_bot->instance_dir);
-  strcat(log_concord_path, log_time_name);
-  strcat(log_concord_path, ".concord.log");
+  sds log_concord_path = sdsnew(global_bot->instance_dir);
+  log_concord_path = sdscat(log_concord_path, log_time_name);
+  log_concord_path = sdscat(log_concord_path, ".concord.log");
 
   log_file_end = fopen(log_end_path, "w");
   log_file_concord = fopen(log_concord_path, "w");
@@ -148,6 +147,9 @@ void bot_init(struct cli_args* cli_args) {
                           "REFCOUNT"),
         1);
   }
+
+  sdsfree(log_end_path);
+  sdsfree(log_concord_path);
 
   discord_set_on_ready(global_bot->discord_bot, &on_ready);
   discord_set_on_interaction_create(global_bot->discord_bot, &on_interaction);
