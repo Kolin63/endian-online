@@ -1,0 +1,17 @@
+#ifndef ENDIAN_REGMAN_H_
+#define ENDIAN_REGMAN_H_
+
+#include "registry.h"
+
+struct regman {
+  struct registry* command_registry;
+};
+
+void regman_init();
+void regman_cleanup();
+
+struct regman* regman_get();
+
+struct registry* regman_get_command();
+
+#endif

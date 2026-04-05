@@ -6,7 +6,7 @@
 #include "bot.h"
 #include "cli_args.h"
 #include "log.h"
-#include "registry_manager.h"
+#include "regman.h"
 
 static bool should_exit = false;
 
@@ -21,7 +21,7 @@ void* cleanup(void*) {
   log_info("Stopping...");
 
   free(cli_args);
-  registry_manager_cleanup();
+  regman_cleanup();
   bot_cleanup();
   printf("Done\n");
 
@@ -32,7 +32,7 @@ void handle_exit() { should_exit = 1; }
 void handle_sigint(int) { handle_exit(); }
 
 int main(int argc, char** argv) {
-  registry_manager_init();
+  regman_init();
   cli_args = malloc(sizeof(struct cli_args));
   bot = malloc(sizeof(struct bot));
 

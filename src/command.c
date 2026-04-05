@@ -15,7 +15,7 @@
 #include "json_macros.h"
 #include "log.h"
 #include "registry.h"
-#include "registry_manager.h"
+#include "regman.h"
 
 // returns amount of errors, 0 if ok
 int command_fillout(char* mod_name, char* cmd_name, cJSON* json,
@@ -111,7 +111,7 @@ void command_load(const struct discord_ready* event, char* mod_name,
   struct discord_create_global_application_command params;
   if (command_fillout(mod_name, cmd_name, json, &params) != 0) return;
 
-  registry_add(registry_manager_get_command_registry(), params.name,
+  registry_add(regman_get_command(), params.name,
                (void*)&params);
   discord_create_global_application_command(
       bot_get_global()->discord_bot, event->application->id, &params, NULL);
