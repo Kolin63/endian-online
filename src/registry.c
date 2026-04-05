@@ -128,9 +128,9 @@ void* registry_itov_safe(struct registry* reg, int i) {
   }
 }
 
-char* registry_itok(struct registry* reg, int i) { return reg->keys[i]; }
+const char* registry_itok(struct registry* reg, int i) { return reg->keys[i]; }
 
-char* registry_itok_safe(struct registry* reg, int i) {
+const char* registry_itok_safe(struct registry* reg, int i) {
   if (i < 0 || i >= reg->length) {
     return NULL;
   } else {

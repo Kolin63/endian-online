@@ -64,10 +64,10 @@ void* registry_itov(struct registry* reg, int i);
 void* registry_itov_safe(struct registry* reg, int i);
 
 // index to key. no bounds checking
-char* registry_itok(struct registry* reg, int i);
+const char* registry_itok(struct registry* reg, int i);
 
 // index to key. returns NULL on error
-char* registry_itok_safe(struct registry* reg, int i);
+const char* registry_itok_safe(struct registry* reg, int i);
 
 // key to index. returns -1 if the key doesn't exist
 int registry_ktoi(struct registry* reg, const char* key);
