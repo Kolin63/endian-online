@@ -12,6 +12,7 @@
 #include "command.h"
 #include "fileio.h"
 #include "json_iterator.h"
+#include "json_macros.h"
 #include "log.h"
 #include "registry.h"
 #include "registry_manager.h"
@@ -72,18 +73,7 @@ int command_fillout(char* mod_name, char* cmd_name, cJSON* json,
     const char* item_name = iter->json->string;
 
     if (strcmp(item_name, "type") == 0) {
-      if (iter->json->type != cJSON_String) {
-        log_error("In command %s from mod %s, type must be string", cmd_name,
-                  mod_name);
-        error++;
-        continue;
-      }
-      if (iter->json->valuestring == NULL) {
-        log_error("In command %s from mod %s, type is NULL", cmd_name,
-                  mod_name);
-        error++;
-        continue;
-      }
+      END_JSON_CHECK_STRING;
       const char* val = iter->json->valuestring;
       if (strcmp(val, "CHAT_INPUT") == 0)
         params->type = DISCORD_APPLICATION_CHAT_INPUT;
@@ -98,78 +88,19 @@ int command_fillout(char* mod_name, char* cmd_name, cJSON* json,
         continue;
       }
     } else if (strcmp(item_name, "name") == 0) {
-      if (iter->json->type != cJSON_String) {
-        log_error("In command %s from mod %s, name must be string", cmd_name,
-                  mod_name);
-        error++;
-        continue;
-      }
-      if (iter->json->valuestring == NULL) {
-        log_error("In command %s from mod %s, name is NULL", cmd_name,
-                  mod_name);
-        error++;
-        continue;
-      }
-      int len = strlen(iter->json->valuestring);
-      if (len < 1 || len > 32) {
-        log_error("In command %s from mod %s, name is wrong size", cmd_name,
-                  mod_name);
-        error++;
-        continue;
-      }
+      END_JSON_CHECK_STRING;
+      END_JSON_CHECK_STRING_LENGTH(1, 32);
       params->name = iter->json->valuestring;
     } else if (strcmp(item_name, "description") == 0) {
-      if (iter->json->type != cJSON_String) {
-        log_error("In command %s from mod %s, description must be string",
-                  cmd_name, mod_name);
-        error++;
-        continue;
-      }
-      if (iter->json->valuestring == NULL) {
-        log_error("In command %s from mod %s, description is NULL", cmd_name,
-                  mod_name);
-        error++;
-        continue;
-      }
-      int len = strlen(iter->json->valuestring);
-      if (len < 1 || len > 100) {
-        log_error("In command %s from mod %s, description is wrong size",
-                  cmd_name, mod_name);
-        error++;
-        continue;
-      }
+      END_JSON_CHECK_STRING;
+      END_JSON_CHECK_STRING_LENGTH(1, 100);
       params->description = iter->json->valuestring;
     } else if (strcmp(item_name, "options") == 0) {
-      if (iter->json->type != cJSON_Array) {
-        log_error("In command %s from mod %s, options must be array", cmd_name,
-                  mod_name);
-        error++;
-        continue;
-      }
-      if (iter->json->child == NULL) {
-        log_error("In command %s from mod %s, options has no items", cmd_name,
-                  mod_name);
-        error++;
-        continue;
-      }
+      END_JSON_CHECK_ARRAY;
       // TODO: load options
       iter = json_iterator_skip_object(iter);
     } else if (strcmp(item_name, "default_member_permissions") == 0) {
-      if (iter->json->type != cJSON_String) {
-        log_error(
-            "In command %s from mod %s, default_member_permissions must be "
-            "string",
-            cmd_name, mod_name);
-        error++;
-        continue;
-      }
-      if (iter->json->valuestring == NULL) {
-        log_error(
-            "In command %s from mod %s, default_member_permissions is NULL",
-            cmd_name, mod_name);
-        error++;
-        continue;
-      }
+      END_JSON_CHECK_STRING;
       char* endptr = iter->json->valuestring;
       errno = 0;
       unsigned long long perms = strtoull(iter->json->valuestring, &endptr, 10);
