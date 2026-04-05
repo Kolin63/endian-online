@@ -20,8 +20,18 @@ void regman_init() {
 }
 
 void regman_cleanup() {
+  for (int i = 0; i < global->command_registry->length; i++) {
+    struct command* cmd = registry_itov(global->command_registry, i);
+    free(cmd->name);
+    free(cmd->description);
+    free(cmd->callback);
+  }
+  for (int i = 0; i < global->function_registry->length; i++) {
+    struct function* func = registry_itov(global->function_registry, i);
+  }
   for (int i = 0; i < global->plugin_registry->length; i++) {
     struct plugin* plugin = registry_itov(global->plugin_registry, i);
+    free(plugin->name);
     dlclose(plugin->plugin);
   }
   registry_cleanup(global->plugin_registry);

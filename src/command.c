@@ -50,10 +50,12 @@ int command_fillout(const char* mod_name, const char* file_name,
     } else if (strcmp(item_name, "name") == 0) {
       END_JSON_CHECK_STRING;
       END_JSON_CHECK_STRING_LENGTH(1, 32);
+      params->name = malloc(strlen(iter->json->valuestring));
       strcpy(params->name, iter->json->valuestring);
     } else if (strcmp(item_name, "description") == 0) {
       END_JSON_CHECK_STRING;
       END_JSON_CHECK_STRING_LENGTH(1, 100);
+      params->description = malloc(strlen(iter->json->valuestring));
       strcpy(params->description, iter->json->valuestring);
     } else if (strcmp(item_name, "options") == 0) {
       END_JSON_CHECK_ARRAY;
@@ -78,7 +80,8 @@ int command_fillout(const char* mod_name, const char* file_name,
         log_error("In command %s from mod %s, function %s not registered",
                   file_name, mod_name, func);
       }
-
+      params->callback = malloc(strlen(func));
+      strcpy(params->callback, func);
     } else {
       log_error("Command %s from mod %s has unknown object %s", file_name,
                 mod_name, iter->json->string);

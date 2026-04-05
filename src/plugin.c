@@ -2,6 +2,7 @@
 
 #include <dlfcn.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "log.h"
 #include "registry.h"
@@ -26,7 +27,11 @@ void plugin_load(const char* plugin_path, const char* mod_name,
   while (*dot_finder != '\0' && *dot_finder != '.') dot_finder++;
   sdsrange(clean_name, 0, dot_finder - clean_name - 1);
 
-  struct plugin plugin = {.plugin = dl, .name = clean_name};
+  struct plugin plugin;
+  plugin.plugin = dl;
+  plugin.name = malloc(strlen(clean_name));
+  strcpy(plugin.name, clean_name);
+
   if (registry_add(regman_get_plugin(), clean_name, &plugin) == -1) {
     log_error("Plugin %s already registered", plugin_name);
   }

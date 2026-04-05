@@ -29,10 +29,12 @@ int function_fillout(const char* mod_name, const char* file_name,
 
     if (strcmp(item_name, "name") == 0) {
       END_JSON_CHECK_STRING;
-      func->name = iter->json->valuestring;
+      func->name = malloc(strlen(iter->json->valuestring));
+      strcpy(func->name, iter->json->valuestring);
     } else if (strcmp(item_name, "plugin") == 0) {
       END_JSON_CHECK_STRING;
-      func->plugin_name = iter->json->valuestring;
+      func->plugin_name = malloc(strlen(iter->json->valuestring));
+      strcpy(func->plugin_name, iter->json->valuestring);
     } else {
       log_error("Function %s from mod %s has unknown object %s", file_name,
                 mod_name, iter->json->string);

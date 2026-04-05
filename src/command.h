@@ -6,8 +6,9 @@
 
 struct command {
   enum discord_application_command_types type;
-  char name[33];
-  char description[101];
+  char* name;
+  char* description;
+  char* callback;
   struct discord_application_command_options* options;
   unsigned long default_member_permissions;
 };

@@ -3,8 +3,8 @@
 
 struct function {
   const void (*function)();
-  const char* name;
-  const char* plugin_name;
+  char* name;
+  char* plugin_name;
 };
 
 void function_load(const char* function_path, const char* mod_name,

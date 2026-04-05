@@ -3,7 +3,7 @@
 
 struct plugin {
   void* plugin;
-  const char* name;
+  char* name;
 };
 
 void plugin_load(const char* plugin_path, const char* mod_name,
