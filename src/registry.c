@@ -67,7 +67,6 @@ int registry_add(struct registry* reg, const char* key, const void* val) {
       } else if (cmp > 0) {
         right = mid - 1;
       } else {
-        fprintf(stderr, "Key already exists in registry: %s\n", key);
         return -1;
       }
     }
