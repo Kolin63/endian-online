@@ -60,7 +60,7 @@ void function_load(const char* function_path, const char* mod_name,
   fileio_cleanup(fileio);
   fclose(file);
 
-  struct function func;
+  struct function func = {};
   function_fillout(mod_name, file_name, json, &func);
 
   const struct plugin* plugin =

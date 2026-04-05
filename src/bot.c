@@ -8,8 +8,12 @@
 #include <time.h>
 
 #include "cli_args.h"
+#include "command.h"
+#include "function.h"
 #include "log.h"
 #include "mod_loader.h"
+#include "registry.h"
+#include "regman.h"
 #include "sds.h"
 
 static struct bot* global_bot = NULL;
@@ -22,17 +26,38 @@ void on_ready(struct discord*, const struct discord_ready* event) {
   mod_loader_load_mods(event);
 }
 
-void on_interaction(struct discord*, const struct discord_interaction* event) {
+void on_interaction(struct discord* client,
+                    const struct discord_interaction* event) {
   if (event->type != DISCORD_INTERACTION_APPLICATION_COMMAND)
-    return; /* return if interaction isn't a slash command */
+    return;  // return if interaction isn't a slash command
 
-  if (strcmp(event->data->name, "ping") == 0) {
-    struct discord_interaction_response params = {
-        .type = DISCORD_INTERACTION_CHANNEL_MESSAGE_WITH_SOURCE,
-        .data = &(struct discord_interaction_callback_data){.content = "pong"}};
-    discord_create_interaction_response(global_bot->discord_bot, event->id,
-                                        event->token, &params, NULL);
+  const char* cmd_name = event->data->name;
+
+  const struct command* cmd = registry_ktov(regman_get_command(), cmd_name);
+
+  if (cmd == NULL) {
+    log_error("Could not find command %s", cmd_name);
+    // TODO: send error message to user via discord
+    return;
   }
+
+  if (cmd->callback == NULL) {
+    log_warn("Command %s has no callback", cmd_name);
+    // TODO: send warning message to user via discord
+    return;
+  }
+
+  const struct function* func =
+      registry_ktov(regman_get_function(), cmd->callback);
+  if (func == NULL) {
+    log_error("In command %s, could not find callback function %s", cmd_name,
+              cmd->callback);
+    // TODO: send warning message to user via discord
+    return;
+  }
+
+  func->function(client, event);
+
   if (strcmp(event->data->name, "stop") == 0) {
     struct discord_interaction_response params = {
         .type = DISCORD_INTERACTION_CHANNEL_MESSAGE_WITH_SOURCE,
