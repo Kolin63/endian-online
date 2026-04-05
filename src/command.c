@@ -17,47 +17,6 @@
 #include "registry.h"
 #include "registry_manager.h"
 
-void command_strict_check_json(const cJSON* json, char* mod_name,
-                               char* cmd_name) {
-  char template_path[512];
-  strcpy(template_path, bot_get_global()->instance_dir);
-  strcat(template_path, "/mods/endian-base/data/commands/template.json");
-
-  struct fileio* fileio = fileio_init();
-  FILE* template_file = fopen(template_path, "r");
-  if (!template_file) {
-    log_error("Could not open template command JSON file at %s", template_path);
-  }
-  fileio_read_all(fileio, template_file);
-
-  cJSON* template = cJSON_Parse(fileio->buf);
-
-  struct json_iterator* iter = json_iterator_init(json);
-
-  // iterate once so that we get inside the root object, then we will skip all
-  // other children so we don't get inside arrays or other objects
-  iter = json_iterate(iter);
-
-  // check each object in the command json, fail if it does not exist in the
-  // template
-  while (true) {
-    iter = json_iterate(iter);
-    if (iter->parent == NULL) break;
-    if (iter->json == NULL) continue;
-
-    if (!cJSON_HasObjectItem(template, iter->json->string)) {
-      log_error("Command %s from mod %s has object %s which is not in template",
-                cmd_name, mod_name, iter->json->string);
-    }
-
-    if (iter->json->type == cJSON_Array || iter->json->type == cJSON_Object)
-      json_iterator_skip_object(iter);
-  }
-
-  json_iterator_cleanup(iter);
-  cJSON_Delete(template);
-}
-
 // returns amount of errors, 0 if ok
 int command_fillout(char* mod_name, char* cmd_name, cJSON* json,
                     struct discord_create_global_application_command* params) {
@@ -111,6 +70,11 @@ int command_fillout(char* mod_name, char* cmd_name, cJSON* json,
             cmd_name, mod_name);
       }
       params->default_member_permissions = perms;
+    } else {
+      log_error("Command %s from mod %s has unknown object %s", cmd_name,
+                mod_name, iter->json->string);
+      if (iter->json->type == cJSON_Array || iter->json->type == cJSON_Object)
+        json_iterator_skip_object(iter);
     }
   }
   return error;
@@ -141,8 +105,6 @@ void command_load(const struct discord_ready* event, char* mod_name,
 
   fileio_cleanup(fileio);
   fclose(file);
-
-  command_strict_check_json(json, mod_name, cmd_name);
 
   struct discord_create_global_application_command params;
   if (command_fillout(mod_name, cmd_name, json, &params) != 0) return;
