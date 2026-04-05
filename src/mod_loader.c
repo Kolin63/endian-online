@@ -8,6 +8,33 @@
 #include "command.h"
 #include "log.h"
 
+#define DIRECTORY_LOAD(path, func)                                   \
+  {                                                                  \
+    char fullpath[512];                                              \
+    strcpy(fullpath, bot_get_global()->instance_dir);                \
+    strcat(fullpath, "/mods/");                                      \
+    strcat(fullpath, mod_name);                                      \
+    strcat(fullpath, "/" path);                                      \
+                                                                     \
+    DIR* dir = opendir(fullpath);                                    \
+    struct dirent* dirent;                                           \
+                                                                     \
+    if (!dir) {                                                      \
+      log_error("Could not open folder from mod %s at %s", mod_name, \
+                fullpath);                                           \
+      return;                                                        \
+    }                                                                \
+                                                                     \
+    while ((dirent = readdir(dir)) != NULL) {                        \
+      if (dirent->d_name[0] == '.') {                                \
+        continue;                                                    \
+      }                                                              \
+      const char* file_name = dirent->d_name;                        \
+      func;                                                          \
+    }                                                                \
+    closedir(dir);                                                   \
+  }
+
 void commands_load(const struct discord_ready* event, const char* mod_name) {
   char path[256];
   strcpy(path, bot_get_global()->instance_dir);
@@ -34,7 +61,7 @@ void commands_load(const struct discord_ready* event, const char* mod_name) {
 }
 
 void data_load(const struct discord_ready* event, const char* mod_name) {
-  commands_load(event, mod_name);
+  DIRECTORY_LOAD("data/commands", command_load(event, mod_name, file_name));
 }
 
 void mod_load(const struct discord_ready* event, const char* mod_name) {
