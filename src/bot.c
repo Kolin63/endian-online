@@ -85,7 +85,7 @@ void bot_init(struct cli_args* cli_args) {
   struct tm* tm_time;
   time(&rawtime);
   tm_time = localtime(&rawtime);
-  strftime(log_time_name, sizeof(log_time_name), "/logs/%Y-%m-%e-%H:%M:%S",
+  strftime(log_time_name, sizeof(log_time_name), "/logs/%Y-%m-%d-%H:%M:%S",
            tm_time);
 
   char log_end_path[256];
