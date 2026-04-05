@@ -119,28 +119,3 @@ void command_load(const struct discord_ready* event, char* mod_name,
 
   cJSON_Delete(json);
 }
-
-void command_load_from_mod(const struct discord_ready* event, char* mod_name) {
-  char path[256];
-  strcpy(path, bot_get_global()->instance_dir);
-  strcat(path, "/mods/");
-  strcat(path, mod_name);
-  strcat(path, "/data/commands");
-
-  DIR* dir = opendir(path);
-  struct dirent* dirent;
-
-  if (!dir) {
-    log_error("Could not open commands folder from mod %s at %s", mod_name,
-              path);
-    return;
-  }
-
-  while ((dirent = readdir(dir)) != NULL) {
-    if (dirent->d_name[0] == '.') {
-      continue;
-    }
-    command_load(event, mod_name, dirent->d_name);
-  }
-  closedir(dir);
-}
