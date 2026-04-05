@@ -108,11 +108,10 @@ void command_load(const struct discord_ready* event, char* mod_name,
   fileio_cleanup(fileio);
   fclose(file);
 
-  struct discord_create_global_application_command params;
+  struct discord_create_global_application_command params = {};
   if (command_fillout(mod_name, cmd_name, json, &params) != 0) return;
 
-  registry_add(regman_get_command(), params.name,
-               (void*)&params);
+  registry_add(regman_get_command(), params.name, (void*)&params);
   discord_create_global_application_command(
       bot_get_global()->discord_bot, event->application->id, &params, NULL);
   log_info("Loading command %s from mod %s", cmd_name, mod_name);
