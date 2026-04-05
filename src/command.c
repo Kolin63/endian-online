@@ -77,6 +77,8 @@ int command_fillout(char* mod_name, char* cmd_name, cJSON* json,
         json_iterator_skip_object(iter);
     }
   }
+
+  json_iterator_cleanup(iter);
   return error;
 }
 
@@ -114,6 +116,8 @@ void command_load(const struct discord_ready* event, char* mod_name,
   discord_create_global_application_command(
       bot_get_global()->discord_bot, event->application->id, &params, NULL);
   log_info("Loading command %s from mod %s", cmd_name, mod_name);
+
+  cJSON_Delete(json);
 }
 
 void command_load_from_mod(const struct discord_ready* event, char* mod_name) {
