@@ -83,22 +83,16 @@ int command_fillout(const char* mod_name, const char* cmd_name,
   return error;
 }
 
-void command_load(const struct discord_ready* event, const char* mod_name,
-                  const char* cmd_name) {
+void command_load(const struct discord_ready* event, const char* command_path,
+                  const char* mod_name, const char* cmd_name) {
   if (strcmp(cmd_name, "template.json") == 0) return;
 
-  char path[512];
-  strcpy(path, bot_get_global()->instance_dir);
-  strcat(path, "/mods/");
-  strcat(path, mod_name);
-  strcat(path, "/data/commands/");
-  strcat(path, cmd_name);
-
   struct fileio* fileio = fileio_init();
-  FILE* file = fopen(path, "r");
+  FILE* file = fopen(command_path, "r");
 
   if (!file) {
-    log_error("Could not open command file from %s at %s", mod_name, path);
+    log_error("Could not open command file from %s at %s", mod_name,
+              command_path);
     return;
   }
 
