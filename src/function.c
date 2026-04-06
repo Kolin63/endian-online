@@ -27,7 +27,15 @@ int function_fillout(const char* mod_name, const char* file_name,
 
     const char* item_name = iter->json->string;
 
-    if (strcmp(item_name, "name") == 0) {
+    if (strcmp(item_name, "type") == 0) {
+      END_JSON_CHECK_STRING;
+      const char* val = iter->json->valuestring;
+      if (strcmp(val, "CALLBACK") == 0) {
+        func->type = CALLBACK;
+      } else if (strcmp(val, "GET_API") == 0) {
+        func->type = GET_API;
+      }
+    } else if (strcmp(item_name, "name") == 0) {
       END_JSON_CHECK_STRING;
       func->name = malloc(strlen(iter->json->valuestring));
       strcpy(func->name, iter->json->valuestring);

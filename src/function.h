@@ -3,9 +3,14 @@
 
 #include <concord/discord.h>
 
+enum function_type {
+  CALLBACK = 1,
+  GET_API = 2,
+};
+
 struct function {
-  const void (*function)(struct discord* client,
-                         const struct discord_interaction* event);
+  enum function_type type;
+  const void (*function)(...);
   char* name;
   char* plugin_name;
 };

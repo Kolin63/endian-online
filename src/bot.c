@@ -7,6 +7,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "api.h"
 #include "cli_args.h"
 #include "command.h"
 #include "function.h"
@@ -24,6 +25,7 @@ bool should_exit = false;
 
 void on_ready(struct discord*, const struct discord_ready* event) {
   mod_loader_load_mods(event);
+  api_distribute();
 }
 
 void on_interaction(struct discord* client,
@@ -56,7 +58,14 @@ void on_interaction(struct discord* client,
     return;
   }
 
-  func->function(client, event);
+  if (func->type != CALLBACK) {
+    log_error("In command %s, function %s is not of type CALLBACK", cmd_name,
+              func->name);
+    // TODO: send warning message to user via discord
+    return;
+  }
+
+  func->function(api_get_global(), client, event);
 
   if (strcmp(event->data->name, "stop") == 0) {
     struct discord_interaction_response params = {

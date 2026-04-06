@@ -5,6 +5,7 @@ project(server)
 file(GLOB SOURCES "src/*.c")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+add_compile_definitions(ENDIAN_ENGINE)
 
 find_package(CURL REQUIRED)
 

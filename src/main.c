@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <stdlib.h>
 
+#include "api.h"
 #include "bot.h"
 #include "cli_args.h"
 #include "log.h"
@@ -35,6 +36,7 @@ int main(int argc, const char** argv) {
   regman_init();
   cli_args = cli_args_init();
   bot = malloc(sizeof(struct bot));
+  api_init();
 
   pthread_t exit_thread;
   pthread_create(&exit_thread, NULL, cleanup, NULL);
