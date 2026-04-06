@@ -12,7 +12,6 @@
 static bool should_exit = false;
 
 static struct cli_args* cli_args;
-static struct bot* bot;
 
 void* cleanup(void*) {
   while (!should_exit && !bot_should_exit()) {
@@ -35,7 +34,6 @@ void handle_sigint(int) { handle_exit(); }
 int main(int argc, const char** argv) {
   regman_init();
   cli_args = cli_args_init();
-  bot = malloc(sizeof(struct bot));
   api_init();
 
   pthread_t exit_thread;
