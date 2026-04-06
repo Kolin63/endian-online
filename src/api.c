@@ -1,5 +1,6 @@
 #include "api.h"
 
+#include <concord/interaction.h>
 #include <stdlib.h>
 
 #include "function.h"
@@ -13,6 +14,8 @@ void api_init() {
   global = malloc(sizeof(struct api));
   global->version = API_VERSION;
   global->log_log = log_log;
+  global->discord_create_interaction_response =
+      discord_create_interaction_response;
 }
 
 void api_cleanup() { free(global); }

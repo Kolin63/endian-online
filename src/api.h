@@ -1,6 +1,8 @@
 #ifndef ENDIAN_API_H_
 #define ENDIAN_API_H_
 
+#include <concord/discord.h>
+
 #define API_VERSION 1
 
 #ifndef ENDIAN_ENGINE
@@ -25,6 +27,11 @@ enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 struct api {
   int version;
   void (*log_log)(int level, const char* file, int line, const char* fmt, ...);
+  CCORDcode (*discord_create_interaction_response)(
+      struct discord* client, u64snowflake interaction_id,
+      const char interaction_token[],
+      struct discord_interaction_response* params,
+      struct discord_ret_interaction_response* ret);
 };
 
 #ifdef ENDIAN_ENGINE
