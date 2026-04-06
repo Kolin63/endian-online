@@ -23,7 +23,7 @@ void* cleanup(void*) {
   cli_args_cleanup(cli_args);
   regman_cleanup();
   bot_cleanup();
-  printf("Done\n");
+  log_info("Done");
 
   exit(EXIT_SUCCESS);
 }
@@ -51,7 +51,7 @@ int main(int argc, const char** argv) {
 
   // this line should never execute, but it's here just in case
   pthread_join(exit_thread, NULL);
-  printf("endian exited in a weird way\n");
+  log_warn("endian exited in a weird way");
 
   return 0;
 }

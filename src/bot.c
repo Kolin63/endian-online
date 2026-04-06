@@ -93,7 +93,7 @@ void bot_init(struct cli_args* cli_args) {
   FILE* token_file = fopen(token_file_path, "r");
 
   if (!token_file) {
-    printf("Could not open token file: %s", token_file_path);
+    log_error("Could not open token file: %s", token_file_path);
     exit(EXIT_FAILURE);
   }
 
@@ -101,7 +101,7 @@ void bot_init(struct cli_args* cli_args) {
   fclose(token_file);
 
   if (strlen(token) == 0) {
-    printf("Bot token is of length 0");
+    log_error("Bot token is of length 0");
     exit(EXIT_FAILURE);
   }
 

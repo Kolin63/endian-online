@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "log.h"
 #include "sds.h"
 
 void print_usage(const char* program_name) {
@@ -56,7 +57,7 @@ void cli_args_parse(int argc, const char** argv, struct cli_args* out) {
 #ifdef __linux__
     const char* home = getenv("HOME");
     if (!home) {
-      printf("Error: could not get value of $HOME\n");
+      log_error("Error: could not get value of $HOME");
       exit(EXIT_FAILURE);
     }
     out->instance_dir = sdscpy(out->instance_dir, home);
