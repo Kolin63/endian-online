@@ -58,21 +58,21 @@ void registry_cleanup(struct registry* reg);
 int registry_add(struct registry* reg, const char* key, const void* val);
 
 // index to value. no bounds checking
-void* registry_itov(struct registry* reg, int i);
+void* registry_itov(const struct registry* reg, int i);
 
 // index to value. returns NULL on error
-void* registry_itov_safe(struct registry* reg, int i);
+void* registry_itov_safe(const struct registry* reg, int i);
 
 // index to key. no bounds checking
-const char* registry_itok(struct registry* reg, int i);
+const char* registry_itok(const struct registry* reg, int i);
 
 // index to key. returns NULL on error
-const char* registry_itok_safe(struct registry* reg, int i);
+const char* registry_itok_safe(const struct registry* reg, int i);
 
 // key to index. returns -1 if the key doesn't exist
-int registry_ktoi(struct registry* reg, const char* key);
+int registry_ktoi(const struct registry* reg, const char* key);
 
 // key to value. returns NULL on error
-void* registry_ktov(struct registry* reg, const char* key);
+void* registry_ktov(const struct registry* reg, const char* key);
 
 #endif
