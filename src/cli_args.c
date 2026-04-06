@@ -42,7 +42,7 @@ void cli_args_parse(int argc, const char** argv, struct cli_args* out) {
         }
       }
     } else {  // not a flag; the instance name
-      sdscpy(out->instance_dir, argv[i]);
+      out->instance_dir = sdscpy(out->instance_dir, argv[i]);
       req_args_passed++;
     }
   }  // done parsing args
