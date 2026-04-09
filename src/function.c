@@ -97,4 +97,7 @@ void function_load(const char* function_path, const char* mod_name,
     log_error("Function %s already registered", func.name);
     return;
   }
+
+  log_info("Loading function %s from plugin %s from mod %s", func.name,
+           func.plugin_name, mod_name);
 }

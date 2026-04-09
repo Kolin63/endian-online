@@ -25,6 +25,8 @@ void regman_cleanup() {
     free(cmd->name);
     free(cmd->description);
     free(cmd->callback);
+    discord_application_command_cleanup(cmd->dcmd);
+    free(cmd->dcmd);
   }
   for (int i = 0; i < global->function_registry->length; i++) {
     struct function* func = registry_itov(global->function_registry, i);

@@ -20,8 +20,14 @@
 
 // returns amount of errors, 0 if ok
 int command_fillout(const char* mod_name, const char* file_name,
-                    const cJSON* json, struct command* params) {
+                    const cJSON* json, const struct fileio* fileio,
+                    struct command* params) {
   int error = 0;
+
+  params->dcmd = malloc(sizeof(struct discord_application_command));
+  discord_application_command_from_json(fileio->buf, fileio->buf_size,
+                                        params->dcmd);
+  params->options = NULL;
 
   struct json_iterator* iter = json_iterator_init(json);
 
@@ -29,6 +35,13 @@ int command_fillout(const char* mod_name, const char* file_name,
     iter = json_iterate(iter);
     if (iter->parent == NULL) break;
     if (iter->json == NULL) continue;
+
+
+    if (strcmp(iter->json->string, "options") == 0) {
+      END_JSON_CHECK_ARRAY;
+      params->options = params->dcmd->options;
+      iter = json_iterator_skip_object(iter);
+    }
 
     const char* item_name = iter->json->string;
 
@@ -57,11 +70,7 @@ int command_fillout(const char* mod_name, const char* file_name,
       END_JSON_CHECK_STRING_LENGTH(1, 100);
       params->description = malloc(strlen(iter->json->valuestring));
       strcpy(params->description, iter->json->valuestring);
-    } else if (strcmp(item_name, "options") == 0) {
-      END_JSON_CHECK_ARRAY;
-      // TODO: load options
-      iter = json_iterator_skip_object(iter);
-    } else if (strcmp(item_name, "default_member_permissions") == 0) {
+    } else if (strcmp(item_name, "default_member_permissions_") == 0) {
       END_JSON_CHECK_STRING;
       char* endptr = iter->json->valuestring;
       errno = 0;
@@ -69,7 +78,7 @@ int command_fillout(const char* mod_name, const char* file_name,
       if (errno != 0 || *endptr != '\0') {
         log_error(
             "In command %s from mod %s, error reading "
-            "default_member_permissions",
+            "default_member_permissions_",
             file_name, mod_name);
       }
       params->default_member_permissions = perms;
@@ -111,11 +120,11 @@ void command_load(const struct discord_ready* event, const char* command_path,
 
   cJSON* json = cJSON_Parse(fileio->buf);
 
+  struct command params = {};
+  if (command_fillout(mod_name, file_name, json, fileio, &params) != 0) return;
+
   fileio_cleanup(fileio);
   fclose(file);
-
-  struct command params = {};
-  if (command_fillout(mod_name, file_name, json, &params) != 0) return;
 
   if (registry_add(regman_get_command(), params.name, (void*)&params) == -1) {
     log_error("Command %s already registered", file_name);

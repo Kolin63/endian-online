@@ -10,6 +10,7 @@ struct command {
   char* description;
   char* callback;
   struct discord_application_command_options* options;
+  struct discord_application_command* dcmd;
   unsigned long default_member_permissions;
 };
 
