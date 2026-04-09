@@ -71,6 +71,8 @@ void function_load(const char* function_path, const char* mod_name,
   struct function func = {};
   function_fillout(mod_name, file_name, json, &func);
 
+  cJSON_Delete(json);
+
   const struct plugin* plugin =
       registry_ktov(regman_get_plugin(), func.plugin_name);
   if (plugin == NULL) {

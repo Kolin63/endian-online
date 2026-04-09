@@ -28,6 +28,8 @@ void regman_cleanup() {
   }
   for (int i = 0; i < global->function_registry->length; i++) {
     struct function* func = registry_itov(global->function_registry, i);
+    free(func->name);
+    free(func->plugin_name);
   }
   for (int i = 0; i < global->plugin_registry->length; i++) {
     struct plugin* plugin = registry_itov(global->plugin_registry, i);
