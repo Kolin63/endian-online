@@ -135,6 +135,17 @@ void bot_init(struct cli_args* cli_args) {
   log_file_end = fopen(log_end_path, "w");
   log_file_concord = fopen(log_concord_path, "w");
 
+  if (!log_file_end) {
+    log_error("Could not open file for Endian logging at %s", log_end_path);
+    exit(EXIT_FAILURE);
+  }
+
+  if (!log_file_concord) {
+    log_error("Could not open file for Concord logging at %s",
+              log_concord_path);
+    exit(EXIT_FAILURE);
+  }
+
   // setup logging from endian
   log_add_fp(log_file_end, LOG_TRACE);
 
