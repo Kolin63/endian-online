@@ -16,6 +16,18 @@ void api_init() {
   global->log_log = log_log;
   global->discord_create_interaction_response =
       discord_create_interaction_response;
+  global->registry_init = registry_init;
+  global->registry_cleanup = registry_cleanup;
+  global->registry_add = registry_add;
+  global->registry_itov = registry_itov;
+  global->registry_itov_safe = registry_itov_safe;
+  global->registry_itok = registry_itok;
+  global->registry_itok_safe = registry_itok_safe;
+  global->registry_ktoi = registry_ktoi;
+  global->registry_ktov = registry_ktov;
+  global->get_plugin_registry = (void*)regman_get_plugin;
+  global->get_function_registry = (void*)regman_get_function;
+  global->get_command_registry = (void*)regman_get_command;
 }
 
 void api_cleanup() { free(global); }
