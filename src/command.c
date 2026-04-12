@@ -397,7 +397,7 @@ int command_fillout(const char* mod_name, const char* file_name,
       END_JSON_CHECK_STRING_LENGTH(1, 100);
       params->description = malloc(strlen(iter->json->valuestring) + 1);
       strcpy(params->description, iter->json->valuestring);
-    } else if (strcmp(item_name, "default_member_permissions_") == 0) {
+    } else if (strcmp(item_name, "default_member_permissions") == 0) {
       END_JSON_CHECK_STRING;
       char* endptr = iter->json->valuestring;
       errno = 0;
@@ -405,7 +405,7 @@ int command_fillout(const char* mod_name, const char* file_name,
       if (errno != 0 || *endptr != '\0') {
         log_error(
             "In command %s from mod %s, error reading "
-            "default_member_permissions_",
+            "default_member_permissions",
             file_name, mod_name);
         error++;
         continue;
