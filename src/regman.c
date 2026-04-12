@@ -22,11 +22,7 @@ void regman_init() {
 void regman_cleanup() {
   for (int i = 0; i < global->command_registry->length; i++) {
     struct command* cmd = registry_itov(global->command_registry, i);
-    free(cmd->name);
-    free(cmd->description);
-    free(cmd->callback);
-    discord_application_command_cleanup(cmd->dcmd);
-    free(cmd->dcmd);
+    command_cleanup(cmd);
   }
   for (int i = 0; i < global->function_registry->length; i++) {
     struct function* func = registry_itov(global->function_registry, i);
