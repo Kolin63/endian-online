@@ -34,6 +34,8 @@ int function_fillout(const char* mod_name, const char* file_name,
         func->type = CALLBACK;
       } else if (strcmp(val, "GET_API") == 0) {
         func->type = GET_API;
+      } else if (strcmp(val, "EXPORT") == 0) {
+        func->type = EXPORT;
       } else {
         log_error("In function %s from mod %s, unknown type %s", file_name,
                   mod_name, val);
