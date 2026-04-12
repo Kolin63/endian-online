@@ -47,6 +47,16 @@ struct discord_application_command_options* command_options_end_to_conc(
   return conc;
 }
 
+void discord_application_command_options_cleanup(
+    struct discord_application_command_options* opts) {
+  if (opts == NULL) return;
+  for (int i = 0; i < opts->size; i++) {
+    discord_application_command_options_cleanup(opts->array[i].options);
+  }
+  free(opts->array);
+  free(opts);
+}
+
 // returns amount of errors, 0 if ok
 // json should point to the root of the choices array
 int command_option_choices_fillout(
@@ -490,6 +500,7 @@ void command_load(const struct discord_ready* event, const char* command_path,
   discord_create_global_application_command(bot_get_global()->discord_bot,
                                             event->application->id,
                                             &discord_params, NULL);
+  discord_application_command_options_cleanup(discord_opts);
   log_info("Loading command %s from mod %s", file_name, mod_name);
 }
 
