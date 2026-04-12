@@ -38,19 +38,57 @@
     }                                                                       \
   }
 
+// checks that an array is the proper type
+// assumes the following variables exist:
+// - struct json_iterator* iter
+// - const char* file_name
+// - const char* mod_name
+// - int error
+#define END_JSON_CHECK_ARRAY                                              \
+  if (iter->json->type != cJSON_Array) {                                  \
+    log_error("In data type %s from mod %s, %s must be array", file_name, \
+              mod_name, iter->json->string);                              \
+    error++;                                                              \
+    continue;                                                             \
+  }
+
 // checks that an array is the proper type and has at least one child
 // assumes the following variables exist:
 // - struct json_iterator* iter
 // - const char* file_name
 // - const char* mod_name
 // - int error
-#define END_JSON_CHECK_ARRAY                                                \
-  if (iter->json->type != cJSON_Array) {                                    \
-    log_error("In data type %s from mod %s, %s must be array", file_name,   \
+#define END_JSON_CHECK_ARRAY_AND_CHILDREN                                   \
+  END_JSON_CHECK_ARRAY;                                                     \
+  if (iter->json->child == NULL) {                                          \
+    log_error("In data type %s from mod %s, %s has no children", file_name, \
               mod_name, iter->json->string);                                \
     error++;                                                                \
     continue;                                                               \
-  }                                                                         \
+  }
+
+// checks that an object is the proper type
+// assumes the following variables exist:
+// - struct json_iterator* iter
+// - const char* file_name
+// - const char* mod_name
+// - int error
+#define END_JSON_CHECK_OBJECT                                              \
+  if (iter->json->type != cJSON_Object) {                                  \
+    log_error("In data type %s from mod %s, %s must be object", file_name, \
+              mod_name, iter->json->string);                               \
+    error++;                                                               \
+    continue;                                                              \
+  }
+
+// checks that an object is the proper type and has at least one child
+// assumes the following variables exist:
+// - struct json_iterator* iter
+// - const char* file_name
+// - const char* mod_name
+// - int error
+#define END_JSON_CHECK_OBJECT_AND_CHILDREN                                  \
+  END_JSON_CHECK_OBJECT;                                                    \
   if (iter->json->child == NULL) {                                          \
     log_error("In data type %s from mod %s, %s has no children", file_name, \
               mod_name, iter->json->string);                                \
