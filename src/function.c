@@ -34,6 +34,11 @@ int function_fillout(const char* mod_name, const char* file_name,
         func->type = CALLBACK;
       } else if (strcmp(val, "GET_API") == 0) {
         func->type = GET_API;
+      } else {
+        log_error("In function %s from mod %s, unknown type %s", file_name,
+                  mod_name, val);
+        error++;
+        continue;
       }
     } else if (strcmp(item_name, "name") == 0) {
       END_JSON_CHECK_STRING;
@@ -47,7 +52,9 @@ int function_fillout(const char* mod_name, const char* file_name,
       log_error("Function %s from mod %s has unknown object %s", file_name,
                 mod_name, iter->json->string);
       if (iter->json->type == cJSON_Array || iter->json->type == cJSON_Object)
-        json_iterator_skip_object(iter);
+        iter = json_iterator_skip_object(iter);
+      error++;
+      continue;
     }
   }
 
@@ -69,7 +76,10 @@ void function_load(const char* function_path, const char* mod_name,
   fclose(file);
 
   struct function func = {};
-  function_fillout(mod_name, file_name, json, &func);
+  if (function_fillout(mod_name, file_name, json, &func) != 0) {
+    cJSON_Delete(json);
+    return;
+  }
 
   cJSON_Delete(json);
 
