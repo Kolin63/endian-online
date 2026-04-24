@@ -14,26 +14,15 @@ struct regman* global;
 void regman_init() {
   global = malloc(sizeof(struct regman));
 
-  global->plugin_registry = registry_init(sizeof(struct plugin));
-  global->function_registry = registry_init(sizeof(struct function));
-  global->command_registry = registry_init(sizeof(struct command));
+  global->plugin_registry =
+      registry_init(sizeof(struct plugin), plugin_cmp, plugin_cleanup);
+  global->function_registry =
+      registry_init(sizeof(struct function), function_cmp, function_cleanup);
+  global->command_registry =
+      registry_init(sizeof(struct command), command_cmp, command_cleanup);
 }
 
 void regman_cleanup() {
-  for (int i = 0; i < global->command_registry->length; i++) {
-    struct command* cmd = registry_itov(global->command_registry, i);
-    command_cleanup(cmd);
-  }
-  for (int i = 0; i < global->function_registry->length; i++) {
-    struct function* func = registry_itov(global->function_registry, i);
-    free(func->name);
-    free(func->plugin_name);
-  }
-  for (int i = 0; i < global->plugin_registry->length; i++) {
-    struct plugin* plugin = registry_itov(global->plugin_registry, i);
-    free(plugin->name);
-    dlclose(plugin->plugin);
-  }
   registry_cleanup(global->plugin_registry);
   registry_cleanup(global->function_registry);
   registry_cleanup(global->command_registry);

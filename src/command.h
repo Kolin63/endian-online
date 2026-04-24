@@ -33,6 +33,9 @@ struct command {
 
 void command_load(const struct discord_ready* event, const char* command_path,
                   const char* mod_name, const char* file_name);
-void command_cleanup(struct command* cmd);
+
+int command_cmp(const void* a, const void* b);
+
+void command_cleanup(void* elem);
 
 #endif

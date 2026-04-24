@@ -13,6 +13,7 @@
 #include "cJSON.h"
 #include "command.h"
 #include "fileio.h"
+#include "function.h"
 #include "json_iterator.h"
 #include "json_macros.h"
 #include "log.h"
@@ -423,8 +424,10 @@ int command_fillout(const char* mod_name, const char* file_name,
       params->default_member_permissions = perms;
     } else if (strcmp(item_name, "callback") == 0) {
       END_JSON_CHECK_STRING;
-      const char* func = iter->json->valuestring;
-      if (registry_ktoi(regman_get_function(), func) == -1) {
+      char* func = iter->json->valuestring;
+      if (registry_ktoi(regman_get_function(),
+                        &(struct function){.name = iter->json->valuestring}) ==
+          -1) {
         log_error("In command %s from mod %s, function %s not registered",
                   file_name, mod_name, func);
         error++;
@@ -482,7 +485,7 @@ void command_load(const struct discord_ready* event, const char* command_path,
 
   cJSON_Delete(json);
 
-  if (registry_add(regman_get_command(), params.name, (void*)&params) == -1) {
+  if (registry_add(regman_get_command(), (void*)&params) == -1) {
     log_error("Command %s already registered", file_name);
     return;
   };
@@ -530,7 +533,14 @@ void command_options_cleanup(struct command_options* opts) {
   free(opts);
 }
 
-void command_cleanup(struct command* cmd) {
+int command_cmp(const void* a, const void* b) {
+  const struct command* x = a;
+  const struct command* y = b;
+  return strcmp(x->name, y->name);
+}
+
+void command_cleanup(void* elem) {
+  struct command* cmd = elem;
   free(cmd->name);
   free(cmd->description);
   free(cmd->callback);

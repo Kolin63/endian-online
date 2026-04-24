@@ -31,25 +31,43 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct registry* registry_init(int val_size) {
+struct registry* registry_init(int val_size,
+                               int (*cmp)(const void*, const void*),
+                               void (*cleanup)(void*)) {
   struct registry* reg = malloc(sizeof(struct registry));
   reg->length = 0;
   reg->val_size = val_size;
-  reg->keys = NULL;
-  reg->values = NULL;
+  reg->cmp = cmp;
+  reg->cleanup = cleanup;
+  reg->vals = NULL;
   return reg;
 }
 
-void registry_cleanup(struct registry* reg) {
-  for (size_t i = 0; i < reg->length; i++) {
-    free(reg->keys[i]);
+void registry_value_cleanup(const struct registry* reg) {
+  if (reg->cleanup != NULL) {
+    for (int i = 0; i < reg->length; i++) {
+      reg->cleanup(registry_itov(reg, i));
+    }
   }
-  free(reg->keys);
-  free(reg->values);
+  free(reg->vals);
+}
+
+void registry_cleanup(struct registry* reg) {
+  registry_value_cleanup(reg);
   free(reg);
 }
 
-int registry_add(struct registry* reg, const char* key, const void* val) {
+int registry_safe_cmp(const struct registry* reg, const void* a,
+                      const void* b) {
+  if (a == b) return 0;
+  if (a == NULL || b == NULL) {
+    if (a > b) return 1;
+    if (a < b) return -1;
+  }
+  return reg->cmp(a, b);
+}
+
+int registry_add(struct registry* reg, const void* val) {
   // do a binary search to find insertion index
   // 0 2 4 6 8
   //       ^
@@ -60,7 +78,7 @@ int registry_add(struct registry* reg, const char* key, const void* val) {
     int right = reg->length - 1;
     while (left <= right) {
       int mid = left + (right - left) / 2;
-      int cmp = strcmp(reg->keys[mid], key);
+      int cmp = registry_safe_cmp(reg, reg->vals + mid * reg->val_size, val);
       if (cmp < 0) {
         left = mid + 1;
       } else if (cmp > 0) {
@@ -72,40 +90,22 @@ int registry_add(struct registry* reg, const char* key, const void* val) {
     insert_index = left + (right - left) / 2;
   }
 
-  // move keys and values to make room
+  // move values to make room
   // 0 2 4 _ 6 8
   //       ^
   //       5
-
-  // first keys
   {
-    reg->keys = realloc(reg->keys, (reg->length + 1) * sizeof(char*));
-    char** src = reg->keys + insert_index;
-    char** dest = src + 1;
-    const size_t n = (reg->length - insert_index) * sizeof(char*);
-    memmove(dest, src, n);
-  }
-
-  // then values
-  {
-    reg->values = realloc(reg->values, (reg->length + 1) * reg->val_size);
-    void* src = reg->values + insert_index * reg->val_size;
+    reg->vals = realloc(reg->vals, (reg->length + 1) * reg->val_size);
+    void* src = reg->vals + insert_index * reg->val_size;
     void* dest = src + reg->val_size;
     const size_t n = (reg->length - insert_index) * reg->val_size;
     memmove(dest, src, n);
   }
 
-  // move in new key
-  {
-    char* new_key = malloc(strlen(key) + 1);
-    strcpy(new_key, key);
-    *(reg->keys + insert_index) = new_key;
-  }
-
   // move in new value
   {
     const void* src = val;
-    void* dest = reg->values + insert_index * reg->val_size;
+    void* dest = reg->vals + insert_index * reg->val_size;
     const size_t n = reg->val_size;
     memcpy(dest, src, n);
   }
@@ -114,36 +114,30 @@ int registry_add(struct registry* reg, const char* key, const void* val) {
   return 0;
 }
 
+void registry_clear(struct registry* reg) {
+  registry_value_cleanup(reg);
+  reg->vals = NULL;
+  reg->length = 0;
+}
+
 void* registry_itov(const struct registry* reg, int i) {
-  return reg->values + i * reg->val_size;
+  return reg->vals + i * reg->val_size;
 }
 
 void* registry_itov_safe(const struct registry* reg, int i) {
   if (i < 0 || i >= reg->length) {
     return NULL;
   } else {
-    return reg->values + i * reg->val_size;
+    return reg->vals + i * reg->val_size;
   }
 }
 
-const char* registry_itok(const struct registry* reg, int i) {
-  return reg->keys[i];
-}
-
-const char* registry_itok_safe(const struct registry* reg, int i) {
-  if (i < 0 || i >= reg->length) {
-    return NULL;
-  } else {
-    return reg->keys[i];
-  }
-}
-
-int registry_ktoi(const struct registry* reg, const char* key) {
+int registry_ktoi(const struct registry* reg, const void* key) {
   int left = 0;
   int right = reg->length - 1;
   while (left <= right) {
     int mid = left + (right - left) / 2;
-    int cmp = strcmp(reg->keys[mid], key);
+    int cmp = registry_safe_cmp(reg, reg->vals + mid * reg->val_size, key);
     if (cmp < 0) {
       left = mid + 1;
     } else if (cmp > 0) {
@@ -155,11 +149,8 @@ int registry_ktoi(const struct registry* reg, const char* key) {
   return -1;
 }
 
-void* registry_ktov(const struct registry* reg, const char* key) {
+void* registry_ktov(const struct registry* reg, const void* key) {
   int i = registry_ktoi(reg, key);
-  if (i < 0) {
-    return NULL;
-  } else {
-    return registry_itov(reg, i);
-  }
+  if (i < 0) return NULL;
+  return registry_itov(reg, i);
 }

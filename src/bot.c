@@ -33,9 +33,10 @@ void on_interaction(struct discord* client,
   if (event->type != DISCORD_INTERACTION_APPLICATION_COMMAND)
     return;  // return if interaction isn't a slash command
 
-  const char* cmd_name = event->data->name;
+  char* cmd_name = event->data->name;
 
-  const struct command* cmd = registry_ktov(regman_get_command(), cmd_name);
+  const struct command* cmd =
+      registry_ktov(regman_get_command(), &(struct command){.name = cmd_name});
 
   if (cmd == NULL) {
     log_error("Could not find command %s", cmd_name);
@@ -49,8 +50,8 @@ void on_interaction(struct discord* client,
     return;
   }
 
-  const struct function* func =
-      registry_ktov(regman_get_function(), cmd->callback);
+  const struct function* func = registry_ktov(
+      regman_get_function(), &(struct function){.name = cmd->callback});
   if (func == NULL) {
     log_error("In command %s, could not find callback function %s", cmd_name,
               cmd->callback);
