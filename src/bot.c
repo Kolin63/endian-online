@@ -19,8 +19,7 @@
 #include "sds.h"
 
 static struct bot* global_bot = NULL;
-static FILE* log_file_end = NULL;
-static FILE* log_file_concord = NULL;
+static FILE* log_file = NULL;
 
 bool should_exit = false;
 
@@ -120,32 +119,21 @@ void bot_init(struct cli_args* cli_args) {
 
   sds log_end_path = sdsnew(global_bot->instance_dir);
   log_end_path = sdscat(log_end_path, log_time_name);
-  log_end_path = sdscat(log_end_path, ".end.log");
+  log_end_path = sdscat(log_end_path, ".log");
 
-  sds log_concord_path = sdsnew(global_bot->instance_dir);
-  log_concord_path = sdscat(log_concord_path, log_time_name);
-  log_concord_path = sdscat(log_concord_path, ".concord.log");
+  log_file = fopen(log_end_path, "w");
 
-  log_file_end = fopen(log_end_path, "w");
-  log_file_concord = fopen(log_concord_path, "w");
-
-  if (!log_file_end) {
+  if (!log_file) {
     log_error("Could not open file for Endian logging at %s", log_end_path);
     exit(EXIT_FAILURE);
   }
 
-  if (!log_file_concord) {
-    log_error("Could not open file for Concord logging at %s", log_concord_path);
-    exit(EXIT_FAILURE);
-  }
-
   // setup logging from endian
-  log_add_fp(log_file_end, LOG_TRACE);
+  log_add_fp(log_file, LOG_TRACE);
 
   // setup logging from concord
   struct logmod_logger* logger = logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "CLIENT");
 
-  logmod_logger_set_logfile(logger, log_file_concord);
   logmod_logger_set_quiet(logger, 0);
 #ifndef LOG_NO_USE_COLOR
   logmod_logger_set_color(logger, 1);
@@ -163,7 +151,6 @@ void bot_init(struct cli_args* cli_args) {
   }
 
   sdsfree(log_end_path);
-  sdsfree(log_concord_path);
 
   discord_set_on_ready(global_bot->discord_bot, &on_ready);
   discord_set_on_interaction_create(global_bot->discord_bot, &on_interaction);
@@ -171,8 +158,7 @@ void bot_init(struct cli_args* cli_args) {
 
 void bot_cleanup() {
   discord_shutdown(global_bot->discord_bot);
-  fclose(log_file_end);
-  fclose(log_file_concord);
+  fclose(log_file);
   free(global_bot);
 }
 
