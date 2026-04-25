@@ -7,6 +7,7 @@ struct regman {
   struct registry* plugin_registry;
   struct registry* function_registry;
   struct registry* command_registry;
+  struct registry* player_registry;
 };
 
 void regman_init();
@@ -17,5 +18,6 @@ struct regman* regman_get();
 struct registry* regman_get_plugin();
 struct registry* regman_get_function();
 struct registry* regman_get_command();
+struct registry* regman_get_player();
 
 #endif
