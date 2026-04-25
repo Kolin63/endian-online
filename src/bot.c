@@ -75,16 +75,6 @@ void on_interaction(struct discord* client,
   }
 
   func->function(api_get_global(), client, event);
-
-  if (strcmp(event->data->name, "stop") == 0) {
-    struct discord_interaction_response params = {
-        .type = DISCORD_INTERACTION_CHANNEL_MESSAGE_WITH_SOURCE,
-        .data = &(struct discord_interaction_callback_data){.content =
-                                                                "Stopping..."}};
-    discord_create_interaction_response(global_bot->discord_bot, event->id,
-                                        event->token, &params, NULL);
-    should_exit = true;
-  }
 }
 
 void bot_init(struct cli_args* cli_args) {
@@ -220,4 +210,5 @@ struct bot* bot_get_global() { return global_bot; }
 
 void bot_start() { discord_run(global_bot->discord_bot); }
 
+void bot_exit() { should_exit = true; }
 bool bot_should_exit() { return should_exit; }

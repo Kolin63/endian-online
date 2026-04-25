@@ -9,12 +9,10 @@
 #include "log.h"
 #include "regman.h"
 
-static bool should_exit = false;
-
 static struct cli_args* cli_args;
 
 void* cleanup(void*) {
-  while (!should_exit && !bot_should_exit()) {
+  while (!bot_should_exit()) {
     ;
   }
 
@@ -28,7 +26,7 @@ void* cleanup(void*) {
   exit(EXIT_SUCCESS);
 }
 
-void handle_exit() { should_exit = 1; }
+void handle_exit() { bot_exit(); }
 void handle_sigint(int) { handle_exit(); }
 
 int main(int argc, const char** argv) {
