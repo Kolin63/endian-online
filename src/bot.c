@@ -36,15 +36,13 @@ void on_ready(struct discord*, const struct discord_ready* event) {
   log_info("%p", player);
 }
 
-void on_interaction(struct discord* client,
-                    const struct discord_interaction* event) {
+void on_interaction(struct discord* client, const struct discord_interaction* event) {
   if (event->type != DISCORD_INTERACTION_APPLICATION_COMMAND)
     return;  // return if interaction isn't a slash command
 
   char* cmd_name = event->data->name;
 
-  const struct command* cmd =
-      registry_ktov(regman_get_command(), &(struct command){.name = cmd_name});
+  const struct command* cmd = registry_ktov(regman_get_command(), &(struct command){.name = cmd_name});
 
   if (cmd == NULL) {
     log_error("Could not find command %s", cmd_name);
@@ -61,15 +59,13 @@ void on_interaction(struct discord* client,
   const struct function* func = registry_ktov(
       regman_get_function(), &(struct function){.name = cmd->callback});
   if (func == NULL) {
-    log_error("In command %s, could not find callback function %s", cmd_name,
-              cmd->callback);
+    log_error("In command %s, could not find callback function %s", cmd_name, cmd->callback);
     // TODO: send warning message to user via discord
     return;
   }
 
   if (func->type != CALLBACK) {
-    log_error("In command %s, function %s is not of type CALLBACK", cmd_name,
-              func->name);
+    log_error("In command %s, function %s is not of type CALLBACK", cmd_name, func->name);
     // TODO: send warning message to user via discord
     return;
   }
@@ -120,8 +116,7 @@ void bot_init(struct cli_args* cli_args) {
   struct tm* tm_time;
   time(&rawtime);
   tm_time = localtime(&rawtime);
-  strftime(log_time_name, sizeof(log_time_name), "/logs/%Y-%m-%d-%H:%M:%S",
-           tm_time);
+  strftime(log_time_name, sizeof(log_time_name), "/logs/%Y-%m-%d-%H:%M:%S", tm_time);
 
   sds log_end_path = sdsnew(global_bot->instance_dir);
   log_end_path = sdscat(log_end_path, log_time_name);
@@ -140,8 +135,7 @@ void bot_init(struct cli_args* cli_args) {
   }
 
   if (!log_file_concord) {
-    log_error("Could not open file for Concord logging at %s",
-              log_concord_path);
+    log_error("Could not open file for Concord logging at %s", log_concord_path);
     exit(EXIT_FAILURE);
   }
 
@@ -149,8 +143,7 @@ void bot_init(struct cli_args* cli_args) {
   log_add_fp(log_file_end, LOG_TRACE);
 
   // setup logging from concord
-  struct logmod_logger* logger =
-      logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "CLIENT");
+  struct logmod_logger* logger = logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "CLIENT");
 
   logmod_logger_set_logfile(logger, log_file_concord);
   logmod_logger_set_quiet(logger, 0);
@@ -159,37 +152,14 @@ void bot_init(struct cli_args* cli_args) {
 #endif
 
   if (cli_args->verbose == 0) {
-    logmod_logger_set_quiet(
-        logmod_get_logger(discord_get_logmod(global_bot->discord_bot),
-                          "WEBSOCKETS"),
-        1);
-    logmod_logger_set_quiet(
-        logmod_get_logger(discord_get_logmod(global_bot->discord_bot),
-                          "WEBSOCKETS_RAW"),
-        1);
-    logmod_logger_set_quiet(
-        logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "HTTP"),
-        1);
-    logmod_logger_set_quiet(
-        logmod_get_logger(discord_get_logmod(global_bot->discord_bot),
-                          "HTTP_RAW"),
-        1);
-    logmod_logger_set_quiet(
-        logmod_get_logger(discord_get_logmod(global_bot->discord_bot),
-                          "GATEWAY"),
-        1);
-    logmod_logger_set_quiet(
-        logmod_get_logger(discord_get_logmod(global_bot->discord_bot),
-                          "REQUEST"),
-        1);
-    logmod_logger_set_quiet(
-        logmod_get_logger(discord_get_logmod(global_bot->discord_bot),
-                          "RATELIMIT"),
-        1);
-    logmod_logger_set_quiet(
-        logmod_get_logger(discord_get_logmod(global_bot->discord_bot),
-                          "REFCOUNT"),
-        1);
+    logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "WEBSOCKETS"), 1);
+    logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "WEBSOCKETS_RAW"), 1);
+    logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "HTTP"), 1);
+    logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "HTTP_RAW"), 1);
+    logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "GATEWAY"), 1);
+    logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "REQUEST"), 1);
+    logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "RATELIMIT"), 1);
+    logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "REFCOUNT"), 1);
   }
 
   sdsfree(log_end_path);

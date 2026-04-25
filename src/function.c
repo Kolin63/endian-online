@@ -30,15 +30,11 @@ int function_fillout(const char* mod_name, const char* file_name,
     if (strcmp(item_name, "type") == 0) {
       END_JSON_CHECK_STRING;
       const char* val = iter->json->valuestring;
-      if (strcmp(val, "CALLBACK") == 0) {
-        func->type = CALLBACK;
-      } else if (strcmp(val, "GET_API") == 0) {
-        func->type = GET_API;
-      } else if (strcmp(val, "EXPORT") == 0) {
-        func->type = EXPORT;
-      } else {
-        log_error("In function %s from mod %s, unknown type %s", file_name,
-                  mod_name, val);
+      if (strcmp(val, "CALLBACK") == 0) func->type = CALLBACK;
+      else if (strcmp(val, "GET_API") == 0) func->type = GET_API;
+      else if (strcmp(val, "EXPORT") == 0) func->type = EXPORT;
+      else {
+        log_error("In function %s from mod %s, unknown type %s", file_name, mod_name, val);
         error++;
         continue;
       }
@@ -51,8 +47,7 @@ int function_fillout(const char* mod_name, const char* file_name,
       func->plugin_name = malloc(strlen(iter->json->valuestring) + 1);
       strcpy(func->plugin_name, iter->json->valuestring);
     } else {
-      log_error("Function %s from mod %s has unknown object %s", file_name,
-                mod_name, iter->json->string);
+      log_error("Function %s from mod %s has unknown object %s", file_name, mod_name, iter->json->string);
       if (iter->json->type == cJSON_Array || iter->json->type == cJSON_Object)
         iter = json_iterator_skip_object(iter);
       error++;
@@ -64,8 +59,7 @@ int function_fillout(const char* mod_name, const char* file_name,
   return error;
 }
 
-void function_load(const char* function_path, const char* mod_name,
-                   const char* file_name) {
+void function_load(const char* function_path, const char* mod_name, const char* file_name) {
   if (strcmp(file_name, "template.json") == 0) return;
 
   FILE* file = fopen(function_path, "r");
@@ -85,8 +79,7 @@ void function_load(const char* function_path, const char* mod_name,
 
   cJSON_Delete(json);
 
-  const struct plugin* plugin = registry_ktov(
-      regman_get_plugin(), &(struct plugin){.name = func.plugin_name});
+  const struct plugin* plugin = registry_ktov(regman_get_plugin(), &(struct plugin){.name = func.plugin_name});
   if (plugin == NULL) {
     log_error("Could not find plugin %s while loading function %s from mod %s",
               func.plugin_name, func.name, mod_name);

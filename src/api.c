@@ -16,8 +16,7 @@ void api_init() {
   global->version = API_VERSION;
   global->log_log = log_log;
   global->bot_exit = bot_exit;
-  global->discord_create_interaction_response =
-      discord_create_interaction_response;
+  global->discord_create_interaction_response = discord_create_interaction_response;
   global->registry_init = registry_init;
   global->registry_cleanup = registry_cleanup;
   global->registry_add = registry_add;

@@ -18,8 +18,7 @@ struct function {
 
 #ifdef ENDIAN_ENGINE
 
-void function_load(const char* function_path, const char* mod_name,
-                   const char* file_name);
+void function_load(const char* function_path, const char* mod_name, const char* file_name);
 
 int function_cmp(const void* a, const void* b);
 

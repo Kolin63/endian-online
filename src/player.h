@@ -1,11 +1,7 @@
 #ifndef ENDIAN_PLAYER_H_
 #define ENDIAN_PLAYER_H_
 
-#if 1
-// this is so this is included first and clang format doesnt move it
 #include <concord/discord.h>
-#endif
-
 #include <concord/discord-response.h>
 
 struct player {

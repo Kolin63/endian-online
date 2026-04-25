@@ -6,8 +6,7 @@ struct plugin {
   char* name;
 };
 
-void plugin_load(const char* plugin_path, const char* mod_name,
-                 const char* plugin_name);
+void plugin_load(const char* plugin_path, const char* mod_name, const char* plugin_name);
 
 int plugin_cmp(const void* a, const void* b);
 

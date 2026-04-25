@@ -3,11 +3,7 @@
 #include "registry.h"
 #include "regman.h"
 
-#if 1
-// this is so this is included first and clang format doesnt move it
 #include <concord/discord.h>
-#endif
-
 #include <concord/discord-response.h>
 #include <concord/user.h>
 #include <stdlib.h>
@@ -27,8 +23,7 @@ enum player_init_status {
 
 static enum player_init_status player_init_status = PLAYER_INIT_STATUS_IDLE;
 
-void player_init_done(struct discord* client, struct discord_response* resp,
-                      const struct discord_user* ret) {
+void player_init_done(struct discord* client, struct discord_response* resp, const struct discord_user* ret) {
   player_init_status = PLAYER_INIT_STATUS_DONE;
 }
 
@@ -48,19 +43,8 @@ struct player* player_init(unsigned long uuid) {
     return NULL;
   }
 
-  // if (sync == NULL) {
-  //   struct discord_ret_user disc = {.done = player_init_callback};
-  //   discord_get_user(bot_get_global()->discord_bot, uuid, &disc);
-
-  //   char* uuid_str = malloc(UUID_CHAR_MAX_LENGTH);
-  //   snprintf(uuid_str, UUID_CHAR_MAX_LENGTH, "%zi", uuid);
-  //   uuid_str = realloc(uuid_str, strlen(uuid_str));
-
-  //   return player;
-
   struct discord_user sync = {};
-  struct discord_ret_user ret = {
-      .done = player_init_done, .fail = player_init_fail, .sync = &sync};
+  struct discord_ret_user ret = {.done = player_init_done, .fail = player_init_fail, .sync = &sync};
   discord_get_user(bot_get_global()->discord_bot, uuid, &ret);
 
   while (player_init_status == PLAYER_INIT_STATUS_WORKING);
@@ -88,10 +72,8 @@ struct player* player_init(unsigned long uuid) {
 int player_cmp(const void* a, const void* b) {
   const struct player* x = a;
   const struct player* y = b;
-  if (x > y)
-    return 1;
-  else if (x < y)
-    return -1;
+  if (x > y) return 1;
+  else if (x < y) return -1;
   return 0;
 }
 

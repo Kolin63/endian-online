@@ -7,7 +7,14 @@
 
 #ifndef ENDIAN_ENGINE
 
-enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
+enum {
+  LOG_TRACE,
+  LOG_DEBUG,
+  LOG_INFO,
+  LOG_WARN,
+  LOG_ERROR,
+  LOG_FATAL
+};
 
 #define log_trace(api, ...) \
   api->log_log(LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
@@ -31,11 +38,10 @@ struct api {
 
   void (*bot_exit)();
 
-  CCORDcode (*discord_create_interaction_response)(
-      struct discord* client, u64snowflake interaction_id,
-      const char interaction_token[],
-      struct discord_interaction_response* params,
-      struct discord_ret_interaction_response* ret);
+  CCORDcode (*discord_create_interaction_response)(struct discord* client, u64snowflake interaction_id,
+                                                   const char interaction_token[],
+                                                   struct discord_interaction_response* params,
+                                                   struct discord_ret_interaction_response* ret);
 
   // puts a new registry on the heap. registry_cleanup() must be called when it
   // is done being used
@@ -50,8 +56,7 @@ struct api {
 
   // calls the registry's cmp function. elides function call if either a or b
   // are NULL. will segfault if the cmp function is unset.
-  int (*registry_safe_cmp)(const struct registry* reg, const void* a,
-                           const void* b);
+  int (*registry_safe_cmp)(const struct registry* reg, const void* a, const void* b);
 
   // adds a value. returns pointer to value in registry, or NULL if key already
   // exists
