@@ -49,8 +49,9 @@ struct api {
   int (*registry_safe_cmp)(const struct registry* reg, const void* a,
                            const void* b);
 
-  // adds a value. returns -1 if the value already exists
-  int (*registry_add)(struct registry* reg, const void* val);
+  // adds a value. returns pointer to value in registry, or NULL if key already
+  // exists
+  void* (*registry_add)(struct registry* reg, const void* val);
 
   // removes all entries from registry. does not call registry_cleanup(). does
   // not need to be called before calling registry_cleanup()

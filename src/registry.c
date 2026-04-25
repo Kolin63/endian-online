@@ -60,14 +60,14 @@ void registry_cleanup(struct registry* reg) {
 int registry_safe_cmp(const struct registry* reg, const void* a,
                       const void* b) {
   if (a == b) return 0;
-  if (a == NULL || b == NULL) {
+  else if (a == NULL || b == NULL) {
     if (a > b) return 1;
-    if (a < b) return -1;
+    else if (a < b) return -1;
   }
   return reg->cmp(a, b);
 }
 
-int registry_add(struct registry* reg, const void* val) {
+void* registry_add(struct registry* reg, const void* val) {
   // do a binary search to find insertion index
   // 0 2 4 6 8
   //       ^
@@ -84,7 +84,7 @@ int registry_add(struct registry* reg, const void* val) {
       } else if (cmp > 0) {
         right = mid - 1;
       } else {
-        return -1;
+        return NULL;
       }
     }
     insert_index = left + (right - left) / 2;
@@ -111,7 +111,7 @@ int registry_add(struct registry* reg, const void* val) {
   }
 
   reg->length++;
-  return 0;
+  return registry_itov(reg, insert_index);
 }
 
 void registry_clear(struct registry* reg) {
@@ -153,4 +153,14 @@ void* registry_ktov(const struct registry* reg, const void* key) {
   int i = registry_ktoi(reg, key);
   if (i < 0) return NULL;
   return registry_itov(reg, i);
+}
+
+int registry_strcmp(const char* a, const char* b) {
+  while (1) {
+    if (*a > *b) return 1;
+    else if (*a < *b) return -1;
+    else if (*a == '\0') return 0;
+    a++;
+    b++;
+  }
 }

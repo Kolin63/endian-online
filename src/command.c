@@ -485,7 +485,7 @@ void command_load(const struct discord_ready* event, const char* command_path,
 
   cJSON_Delete(json);
 
-  if (registry_add(regman_get_command(), (void*)&params) == -1) {
+  if (registry_add(regman_get_command(), (void*)&params) == NULL) {
     log_error("Command %s already registered", file_name);
     return;
   };
@@ -536,7 +536,7 @@ void command_options_cleanup(struct command_options* opts) {
 int command_cmp(const void* a, const void* b) {
   const struct command* x = a;
   const struct command* y = b;
-  return strcmp(x->name, y->name);
+  return registry_strcmp(x->name, y->name);
 }
 
 void command_cleanup(void* elem) {

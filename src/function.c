@@ -105,7 +105,7 @@ void function_load(const char* function_path, const char* mod_name,
 
   func.function = handle;
 
-  if (registry_add(regman_get_function(), &func) == -1) {
+  if (registry_add(regman_get_function(), &func) == NULL) {
     log_error("Function %s already registered", func.name);
     return;
   }
@@ -117,7 +117,7 @@ void function_load(const char* function_path, const char* mod_name,
 int function_cmp(const void* a, const void* b) {
   const struct function* x = a;
   const struct function* y = b;
-  return strcmp(x->name, y->name);
+  return registry_strcmp(x->name, y->name);
 }
 
 void function_cleanup(void* elem) {
