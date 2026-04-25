@@ -132,13 +132,6 @@ void bot_init(struct cli_args* cli_args) {
   log_add_fp(log_file, LOG_TRACE);
 
   // setup logging from concord
-  struct logmod_logger* logger = logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "CLIENT");
-
-  logmod_logger_set_quiet(logger, 0);
-#ifndef LOG_NO_USE_COLOR
-  logmod_logger_set_color(logger, 1);
-#endif
-
   if (cli_args->verbose == 0) {
     logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "WEBSOCKETS"), 1);
     logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "WEBSOCKETS_RAW"), 1);
