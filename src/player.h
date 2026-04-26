@@ -10,6 +10,8 @@ struct player {
   unsigned long uuid;
 };
 
+#ifdef ENDIAN_ENGINE
+
 // initializes player
 // returns pointer to player in registry
 struct player* player_init(unsigned long uuid);
@@ -21,5 +23,7 @@ struct player* player_get(unsigned long uuid);
 int player_cmp(const void* a, const void* b);
 
 void player_cleanup(void* elem);
+
+#endif
 
 #endif
