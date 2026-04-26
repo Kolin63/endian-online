@@ -3,6 +3,7 @@
 #include "registry.h"
 #include "regman.h"
 
+#include <pthread.h>
 #include <concord/discord.h>
 #include <concord/discord-response.h>
 #include <concord/user.h>
@@ -20,6 +21,7 @@ enum player_init_status {
 };
 
 static enum player_init_status player_init_status = PLAYER_INIT_STATUS_IDLE;
+static pthread_mutex_t player_init_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void player_init_done(struct discord* client, struct discord_response* resp, const struct discord_user* ret) {
   player_init_status = PLAYER_INIT_STATUS_DONE;
@@ -30,6 +32,8 @@ void player_init_fail(struct discord* client, struct discord_response* resp) {
 }
 
 struct player* player_init(unsigned long uuid) {
+  pthread_mutex_lock(&player_init_lock);
+
   while (player_init_status != PLAYER_INIT_STATUS_IDLE);
   player_init_status = PLAYER_INIT_STATUS_WORKING;
 
@@ -38,6 +42,7 @@ struct player* player_init(unsigned long uuid) {
   if (registry_add(regman_get_player(), &player) == NULL) {
     log_error("Could not initialize player %zi", uuid);
     free(player);
+    pthread_mutex_unlock(&player_init_lock);
     return NULL;
   }
 
@@ -50,12 +55,14 @@ struct player* player_init(unsigned long uuid) {
   if (player_init_status == PLAYER_INIT_STATUS_FAIL) {
     log_error("Failed to initialize player %zi", uuid);
     free(player);
+    pthread_mutex_unlock(&player_init_lock);
     return NULL;
   }
 
   if (player->uuid != sync.id) {
     log_error("Given UUID does not match returned UUID (%zi)", player->uuid);
     free(player);
+    pthread_mutex_unlock(&player_init_lock);
     return NULL;
   }
 
@@ -69,6 +76,7 @@ struct player* player_init(unsigned long uuid) {
   player_init_status = PLAYER_INIT_STATUS_IDLE;
 
   log_info("Initializing player %s (%zi)", player->username, player->uuid);
+  pthread_mutex_unlock(&player_init_lock);
   return player;
 }
 

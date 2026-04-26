@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <pthread.h>
 
 #include "api.h"
 #include "cli_args.h"
@@ -18,9 +19,18 @@
 #include "sds.h"
 
 static struct bot* global_bot = NULL;
-static FILE* log_file = NULL;
+static bool should_exit = false;
 
-bool should_exit = false;
+static FILE* log_file = NULL;
+static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
+
+void log_lock_func(bool lock, void* udata) {
+  if (lock == true) {
+    pthread_mutex_lock(&log_lock);
+  } else {
+    pthread_mutex_unlock(&log_lock);
+  }
+}
 
 void on_ready(struct discord*, const struct discord_ready* event) {
   mod_loader_load_mods(event);
@@ -123,6 +133,7 @@ void bot_init(struct cli_args* cli_args) {
   }
 
   log_add_fp(log_file, LOG_TRACE);
+  log_set_lock(log_lock_func, NULL);
 
   sdsfree(log_file_path);
 
