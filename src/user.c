@@ -21,7 +21,7 @@ enum user_init_status {
 };
 
 static enum user_init_status user_init_status = USER_INIT_STATUS_IDLE;
-static pthread_mutex_t user_init_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_rwlock_t user_lock = PTHREAD_RWLOCK_INITIALIZER;
 
 void user_init_done(struct discord* client, struct discord_response* resp, const struct discord_user* ret) {
   user_init_status = USER_INIT_STATUS_DONE;
@@ -32,7 +32,7 @@ void user_init_fail(struct discord* client, struct discord_response* resp) {
 }
 
 struct user* user_init(unsigned long uuid) {
-  pthread_mutex_lock(&user_init_lock);
+  pthread_rwlock_wrlock(&user_lock);
 
   while (user_init_status != USER_INIT_STATUS_IDLE);
   user_init_status = USER_INIT_STATUS_WORKING;
@@ -42,7 +42,7 @@ struct user* user_init(unsigned long uuid) {
   if (registry_add(regman_get()->user_registry, &user) == NULL) {
     log_error("Could not initialize user %zi", uuid);
     free(user);
-    pthread_mutex_unlock(&user_init_lock);
+    pthread_rwlock_unlock(&user_lock);
     return NULL;
   }
 
@@ -55,14 +55,14 @@ struct user* user_init(unsigned long uuid) {
   if (user_init_status == USER_INIT_STATUS_FAIL) {
     log_error("Failed to initialize user %zi", uuid);
     free(user);
-    pthread_mutex_unlock(&user_init_lock);
+    pthread_rwlock_unlock(&user_lock);
     return NULL;
   }
 
   if (user->uuid != sync.id) {
     log_error("Given UUID does not match returned UUID (%zi)", user->uuid);
     free(user);
-    pthread_mutex_unlock(&user_init_lock);
+    pthread_rwlock_unlock(&user_lock);
     return NULL;
   }
 
@@ -76,19 +76,19 @@ struct user* user_init(unsigned long uuid) {
   user_init_status = USER_INIT_STATUS_IDLE;
 
   log_info("Initializing user %s (%zi)", user->username, user->uuid);
-  pthread_mutex_unlock(&user_init_lock);
+  pthread_rwlock_unlock(&user_lock);
   return user;
 }
 
 struct user* user_get(unsigned long uuid) {
-  pthread_mutex_lock(&user_init_lock);
+  pthread_rwlock_rdlock(&user_lock);
   struct user* key = &(struct user){.uuid = uuid};
   struct user** ret_ptr = registry_ktov(regman_get()->user_registry, &key);
   if (ret_ptr == NULL) {
-    pthread_mutex_unlock(&user_init_lock);
+    pthread_rwlock_unlock(&user_lock);
     return user_init(uuid);
   }
-  pthread_mutex_unlock(&user_init_lock);
+  pthread_rwlock_unlock(&user_lock);
   return *ret_ptr;
 }
 
