@@ -117,19 +117,22 @@ void bot_init(struct cli_args* cli_args) {
   tm_time = localtime(&rawtime);
   strftime(log_time_name, sizeof(log_time_name), "/logs/%Y-%m-%d-%H:%M:%S", tm_time);
 
-  sds log_end_path = sdsnew(global_bot->instance_dir);
-  log_end_path = sdscat(log_end_path, log_time_name);
-  log_end_path = sdscat(log_end_path, ".log");
+  // setup logging from endian
+  sds log_file_path = sdsnew(global_bot->instance_dir);
+  log_file_path = sdscat(log_file_path, log_time_name);
+  log_file_path = sdscat(log_file_path, ".log");
 
-  log_file = fopen(log_end_path, "w");
+  log_file = fopen(log_file_path, "w");
 
   if (!log_file) {
-    log_error("Could not open file for Endian logging at %s", log_end_path);
+    log_error("Could not open file for Endian logging at %s", log_file_path);
+    sdsfree(log_file_path);
     exit(EXIT_FAILURE);
   }
 
-  // setup logging from endian
   log_add_fp(log_file, LOG_TRACE);
+
+  sdsfree(log_file_path);
 
   // setup logging from concord
   if (cli_args->verbose == 0) {
@@ -142,8 +145,6 @@ void bot_init(struct cli_args* cli_args) {
     logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "RATELIMIT"), 1);
     logmod_logger_set_quiet(logmod_get_logger(discord_get_logmod(global_bot->discord_bot), "REFCOUNT"), 1);
   }
-
-  sdsfree(log_end_path);
 
   discord_set_on_ready(global_bot->discord_bot, &on_ready);
   discord_set_on_interaction_create(global_bot->discord_bot, &on_interaction);
