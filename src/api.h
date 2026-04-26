@@ -75,6 +75,9 @@ struct api {
   // key to value. returns -1 if the key doesn't exist
   void* (*registry_ktov)(const struct registry* reg, const void* key);
 
+  // fast implementation of strcmp. only return values are 1, 0, or -1
+  int (*registry_strcmp)(const char* a, const char* b);
+
   const struct registry* (*get_plugin_registry)();
   const struct registry* (*get_function_registry)();
   const struct registry* (*get_command_registry)();

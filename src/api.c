@@ -24,6 +24,7 @@ void api_init() {
   global->registry_itov_safe = registry_itov_safe;
   global->registry_ktoi = registry_ktoi;
   global->registry_ktov = registry_ktov;
+  global->registry_strcmp = registry_strcmp;
   global->get_plugin_registry = (void*)regman_get_plugin;
   global->get_function_registry = (void*)regman_get_function;
   global->get_command_registry = (void*)regman_get_command;
