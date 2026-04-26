@@ -81,7 +81,6 @@ struct api {
   const struct registry* (*get_plugin_registry)();
   const struct registry* (*get_function_registry)();
   const struct registry* (*get_command_registry)();
-  struct registry* (*get_player_registry)();
 
   // initializes player
   // returns pointer to player in registry

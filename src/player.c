@@ -39,7 +39,7 @@ struct player* player_init(unsigned long uuid) {
 
   struct player* player = malloc(sizeof(struct player));
   player->uuid = uuid;
-  if (registry_add(regman_get_player(), &player) == NULL) {
+  if (registry_add(regman_get()->player_registry, &player) == NULL) {
     log_error("Could not initialize player %zi", uuid);
     free(player);
     pthread_mutex_unlock(&player_init_lock);
@@ -81,11 +81,14 @@ struct player* player_init(unsigned long uuid) {
 }
 
 struct player* player_get(unsigned long uuid) {
+  pthread_mutex_lock(&player_init_lock);
   struct player* key = &(struct player){.uuid = uuid};
-  struct player** ret_ptr = registry_ktov(regman_get_player(), &key);
+  struct player** ret_ptr = registry_ktov(regman_get()->player_registry, &key);
   if (ret_ptr == NULL) {
+    pthread_mutex_unlock(&player_init_lock);
     return player_init(uuid);
   }
+  pthread_mutex_unlock(&player_init_lock);
   return *ret_ptr;
 }
 

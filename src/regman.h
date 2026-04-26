@@ -18,6 +18,5 @@ struct regman* regman_get();
 struct registry* regman_get_plugin();
 struct registry* regman_get_function();
 struct registry* regman_get_command();
-struct registry* regman_get_player();
 
 #endif

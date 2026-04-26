@@ -34,4 +34,3 @@ struct regman* regman_get() { return global; }
 struct registry* regman_get_plugin() { return global->plugin_registry; }
 struct registry* regman_get_function() { return global->function_registry; }
 struct registry* regman_get_command() { return global->command_registry; }
-struct registry* regman_get_player() { return global->player_registry; }

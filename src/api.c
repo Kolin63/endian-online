@@ -35,7 +35,6 @@ void api_init() {
   global->get_plugin_registry = (void*)regman_get_plugin;
   global->get_function_registry = (void*)regman_get_function;
   global->get_command_registry = (void*)regman_get_command;
-  global->get_player_registry = regman_get_player;
 
   global->player_init = player_init;
   global->player_get = player_get;
