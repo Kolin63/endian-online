@@ -33,7 +33,7 @@ struct api {
 
   void (*log_log)(int level, const char* file, int line, const char* fmt, ...);
 
-  void (*bot_exit)();
+  void (*exit)();
 
   CCORDcode (*discord_create_interaction_response)(struct discord* client, u64snowflake interaction_id,
                                                    const char interaction_token[],

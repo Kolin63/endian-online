@@ -19,10 +19,12 @@
 #include "sds.h"
 
 static struct bot* global_bot = NULL;
-static bool should_exit = false;
 
 static FILE* log_file = NULL;
 static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
+
+// forward declaration
+void set_cleanup_ready();
 
 void log_lock_func(bool lock, void* udata) {
   if (lock == true) {
@@ -35,6 +37,7 @@ void log_lock_func(bool lock, void* udata) {
 void on_ready(struct discord*, const struct discord_ready* event) {
   mod_loader_load_mods(event);
   api_distribute();
+  set_cleanup_ready();
 }
 
 void on_interaction(struct discord* client, const struct discord_interaction* event) {
@@ -154,7 +157,6 @@ void bot_init(struct cli_args* cli_args) {
 }
 
 void bot_cleanup() {
-  discord_shutdown(global_bot->discord_bot);
   fclose(log_file);
   free(global_bot);
 }
@@ -162,6 +164,3 @@ void bot_cleanup() {
 struct bot* bot_get_global() { return global_bot; }
 
 void bot_start() { discord_run(global_bot->discord_bot); }
-
-void bot_exit() { should_exit = true; }
-bool bot_should_exit() { return should_exit; }

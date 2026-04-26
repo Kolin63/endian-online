@@ -3,12 +3,14 @@
 #include <concord/interaction.h>
 #include <stdlib.h>
 
-#include "bot.h"
 #include "function.h"
 #include "log.h"
 #include "registry.h"
 #include "regman.h"
 #include "user.h"
+
+// forward declaration. defined in main.c
+void handle_exit();
 
 static struct api* global;
 
@@ -19,7 +21,7 @@ void api_init() {
 
   global->log_log = log_log;
 
-  global->bot_exit = bot_exit;
+  global->exit = handle_exit;
 
   global->discord_create_interaction_response = discord_create_interaction_response;
 

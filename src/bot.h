@@ -17,7 +17,4 @@ void bot_cleanup();
 struct bot* bot_get_global();
 void bot_start();
 
-void bot_exit();
-bool bot_should_exit();
-
 #endif
