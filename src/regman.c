@@ -6,7 +6,7 @@
 
 #include "command.h"
 #include "function.h"
-#include "player.h"
+#include "user.h"
 #include "plugin.h"
 #include "registry.h"
 
@@ -18,14 +18,14 @@ void regman_init() {
   global->plugin_registry = registry_init(sizeof(struct plugin), plugin_cmp, plugin_cleanup);
   global->function_registry = registry_init(sizeof(struct function), function_cmp, function_cleanup);
   global->command_registry = registry_init(sizeof(struct command), command_cmp, command_cleanup);
-  global->player_registry = registry_init(sizeof(struct player*), player_cmp, player_cleanup);
+  global->user_registry = registry_init(sizeof(struct user*), user_cmp, user_cleanup);
 }
 
 void regman_cleanup() {
   registry_cleanup(global->plugin_registry);
   registry_cleanup(global->function_registry);
   registry_cleanup(global->command_registry);
-  registry_cleanup(global->player_registry);
+  registry_cleanup(global->user_registry);
   free(global);
 }
 

@@ -8,7 +8,7 @@
 #include "log.h"
 #include "registry.h"
 #include "regman.h"
-#include "player.h"
+#include "user.h"
 
 static struct api* global;
 
@@ -36,8 +36,8 @@ void api_init() {
   global->get_function_registry = (void*)regman_get_function;
   global->get_command_registry = (void*)regman_get_command;
 
-  global->player_init = player_init;
-  global->player_get = player_get;
+  global->user_init = user_init;
+  global->user_get = user_get;
 }
 
 void api_cleanup() { free(global); }

@@ -82,13 +82,13 @@ struct api {
   const struct registry* (*get_function_registry)();
   const struct registry* (*get_command_registry)();
 
-  // initializes player
-  // returns pointer to player in registry
-  struct player* (*player_init)(unsigned long uuid);
+  // initializes user
+  // returns pointer to user in registry
+  struct user* (*user_init)(unsigned long uuid);
 
-  // returns pointer to player in registry
-  // initializes the player if it is not in registry
-  struct player* (*player_get)(unsigned long uuid);
+  // returns pointer to user in registry
+  // initializes the user if it is not in registry
+  struct user* (*user_get)(unsigned long uuid);
 };
 
 #ifdef ENDIAN_ENGINE

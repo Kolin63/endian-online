@@ -7,7 +7,7 @@ struct regman {
   struct registry* plugin_registry;
   struct registry* function_registry;
   struct registry* command_registry;
-  struct registry* player_registry;
+  struct registry* user_registry;
 };
 
 void regman_init();
