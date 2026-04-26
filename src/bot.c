@@ -13,7 +13,6 @@
 #include "function.h"
 #include "log.h"
 #include "mod_loader.h"
-#include "player.h"
 #include "registry.h"
 #include "regman.h"
 #include "sds.h"
@@ -26,13 +25,6 @@ bool should_exit = false;
 void on_ready(struct discord*, const struct discord_ready* event) {
   mod_loader_load_mods(event);
   api_distribute();
-
-  struct player* player = player_init(488335709883727882);
-  log_info("%s https://cdn.discordapp.com/avatars/%zi/%s %zi", player->username,
-           player->uuid, player->avatar, player->uuid);
-
-  player = player_init(1);
-  log_info("%p", player);
 }
 
 void on_interaction(struct discord* client, const struct discord_interaction* event) {
