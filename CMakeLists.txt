@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(server C)
 
-file(GLOB SOURCES "src/*.c")
+file(GLOB SOURCES "src/*.c" "dependencies/*.c")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 add_compile_definitions(ENDIAN_ENGINE)
@@ -17,7 +17,7 @@ set_target_properties(concord PROPERTIES
 
 target_link_libraries(${PROJECT_NAME} PRIVATE concord CURL::libcurl)
 
-target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}/dependencies")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
   C_STANDARD 23
