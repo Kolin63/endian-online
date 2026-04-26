@@ -90,7 +90,7 @@ void* registry_itov_safe(const struct registry* reg, int i);
 // key to index. returns -1 if the key doesn't exist
 int registry_ktoi(const struct registry* reg, const void* key);
 
-// key to value. returns -1 if the key doesn't exist
+// key to value. returns NULL if the key doesn't exist
 void* registry_ktov(const struct registry* reg, const void* key);
 
 // fast implementation of strcmp. only return values are 1, 0, or -1
