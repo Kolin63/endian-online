@@ -81,6 +81,15 @@ struct api {
   const struct registry* (*get_plugin_registry)();
   const struct registry* (*get_function_registry)();
   const struct registry* (*get_command_registry)();
+  struct registry* (*get_player_registry)();
+
+  // initializes player
+  // returns pointer to player in registry
+  struct player* (*player_init)(unsigned long uuid);
+
+  // returns pointer to player in registry
+  // initializes the player if it is not in registry
+  struct player* (*player_get)(unsigned long uuid);
 };
 
 #ifdef ENDIAN_ENGINE

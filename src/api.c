@@ -8,15 +8,21 @@
 #include "log.h"
 #include "registry.h"
 #include "regman.h"
+#include "player.h"
 
 static struct api* global;
 
 void api_init() {
   global = malloc(sizeof(struct api));
+
   global->version = API_VERSION;
+
   global->log_log = log_log;
+
   global->bot_exit = bot_exit;
+
   global->discord_create_interaction_response = discord_create_interaction_response;
+
   global->registry_init = registry_init;
   global->registry_cleanup = registry_cleanup;
   global->registry_add = registry_add;
@@ -25,9 +31,14 @@ void api_init() {
   global->registry_ktoi = registry_ktoi;
   global->registry_ktov = registry_ktov;
   global->registry_strcmp = registry_strcmp;
+
   global->get_plugin_registry = (void*)regman_get_plugin;
   global->get_function_registry = (void*)regman_get_function;
   global->get_command_registry = (void*)regman_get_command;
+  global->get_player_registry = regman_get_player;
+
+  global->player_init = player_init;
+  global->player_get = player_get;
 }
 
 void api_cleanup() { free(global); }

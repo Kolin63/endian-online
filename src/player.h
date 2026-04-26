@@ -14,6 +14,10 @@ struct player {
 // returns pointer to player in registry
 struct player* player_init(unsigned long uuid);
 
+// returns pointer to player in registry
+// initializes the player if it is not in registry
+struct player* player_get(unsigned long uuid);
+
 int player_cmp(const void* a, const void* b);
 
 void player_cleanup(void* elem);

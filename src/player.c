@@ -12,8 +12,6 @@
 #include "bot.h"
 #include "log.h"
 
-#define UUID_CHAR_MAX_LENGTH 128
-
 enum player_init_status {
   PLAYER_INIT_STATUS_IDLE,
   PLAYER_INIT_STATUS_WORKING,
@@ -37,7 +35,7 @@ struct player* player_init(unsigned long uuid) {
 
   struct player* player = malloc(sizeof(struct player));
   player->uuid = uuid;
-  if (registry_add(regman_get_player(), player) == NULL) {
+  if (registry_add(regman_get_player(), &player) == NULL) {
     log_error("Could not initialize player %zi", uuid);
     free(player);
     return NULL;
@@ -62,18 +60,37 @@ struct player* player_init(unsigned long uuid) {
   }
 
   player->username = sync.username;
-  player->avatar = sync.avatar;
+
+  char* avatar = malloc(128);
+  snprintf(avatar, 128, "https://cdn.discordapp.com/avatars/%zi/%s", uuid, sync.avatar);
+  avatar = realloc(avatar, strlen(avatar) + 1);
+  player->avatar = avatar;
 
   player_init_status = PLAYER_INIT_STATUS_IDLE;
 
+  log_info("Initializing player %s (%zi)", player->username, player->uuid);
   return player;
 }
 
+struct player* player_get(unsigned long uuid) {
+  struct player* key = &(struct player){.uuid = uuid};
+  struct player** ret_ptr = registry_ktov(regman_get_player(), &key);
+  if (ret_ptr == NULL) {
+    return player_init(uuid);
+  }
+  return *ret_ptr;
+}
+
 int player_cmp(const void* a, const void* b) {
-  const struct player* x = a;
-  const struct player* y = b;
-  if (x > y) return 1;
-  else if (x < y) return -1;
+  const struct player** x = (void*)a;
+  const struct player** y = (void*)b;
+
+  if (*x == NULL && *y == NULL) return 0;
+  else if (*x == NULL) return -1;
+  else if (*y == NULL) return 1;
+
+  if ((*x)->uuid > (*y)->uuid) return 1;
+  else if ((*x)->uuid < (*y)->uuid) return -1;
   return 0;
 }
 
