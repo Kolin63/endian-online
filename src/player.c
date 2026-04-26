@@ -95,7 +95,7 @@ int player_cmp(const void* a, const void* b) {
 }
 
 void player_cleanup(void* elem) {
-  struct player* player = elem;
+  struct player* player = *((struct player**)elem);
   free(player->username);
   free(player->avatar);
   free(player);

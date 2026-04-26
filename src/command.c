@@ -444,25 +444,29 @@ void command_load(const struct discord_ready* event, const char* command_path,
 }
 
 void command_options_cleanup(struct command_options* opts) {
+  if (opts == NULL) return;
   for (int i = 0; i < opts->size; i++) {
     struct command_option* opt = &(opts->options[i]);
     free(opt->name);
     free(opt->description);
     free(opt->min_value);
     free(opt->max_value);
-    for (int j = 0; j < opt->choices->size; j++) {
-      struct discord_application_command_option_choice* c = &(opt->choices->array[j]);
-      free(c->name);
-      free(c->value);
-    }
-    free(opt->choices->array);
-    free(opt->choices);
-    free(opt->channel_types->array);
-    free(opt->channel_types);
 
-    command_options_cleanup(opt->options);
-    free(opt->options->options);
-    free(opt->options);
+    if (opt->choices != NULL) {
+      for (int j = 0; j < opt->choices->size; j++) {
+        struct discord_application_command_option_choice* c = &(opt->choices->array[j]);
+        free(c->name);
+        free(c->value);
+      }
+      free(opt->choices->array);
+      free(opt->choices);
+      free(opt->channel_types->array);
+      free(opt->channel_types);
+    }
+
+    if (opt->options != NULL) {
+      command_options_cleanup(opt->options);
+    }
   }
 
   free(opts);
