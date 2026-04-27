@@ -35,6 +35,7 @@ int save_write(const char* dir, const char* file, const char* ext, const char* c
 
   fprintf(file_handle, "%s", content);
   fclose(file_handle);
+  sdsfree(path);
   return 0;
 }
 
@@ -65,5 +66,6 @@ int save_read(const char* dir, const char* file, const char* ext, char* buf) {
 
   fileio_read_all(&buf, file_handle);
   fclose(file_handle);
+  sdsfree(path);
   return 0;
 }
