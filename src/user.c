@@ -7,6 +7,7 @@
 #include <concord/discord.h>
 #include <concord/discord-response.h>
 #include <concord/user.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -110,4 +111,12 @@ void user_cleanup(void* elem) {
   free(user->username);
   free(user->avatar);
   free(user);
+}
+
+void uuid_to_string(unsigned long uuid, char* buf) {
+  snprintf(buf, UUID_STR_LEN, "%zi", uuid);
+}
+
+unsigned long string_to_uuid(const char* str) {
+  return strtoul(str, NULL, 10);
 }

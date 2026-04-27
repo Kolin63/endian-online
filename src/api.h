@@ -93,6 +93,13 @@ struct api {
   // returns pointer to user in registry
   // initializes the user if it is not in registry
   struct user* (*user_get)(unsigned long uuid);
+
+  // converts uuid (unsigned long) to string.
+  // string should be of length UUID_STR_LEN
+  void (*uuid_to_string)(unsigned long uuid, char* buf);
+
+  // converts string to uuid (unsigned long)
+  unsigned long (*string_to_uuid)(const char* str);
 };
 
 #ifdef ENDIAN_ENGINE

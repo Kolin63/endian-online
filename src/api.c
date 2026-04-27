@@ -42,6 +42,8 @@ void api_init() {
 
   global->user_init = user_init;
   global->user_get = user_get;
+  global->uuid_to_string = uuid_to_string;
+  global->string_to_uuid = string_to_uuid;
 }
 
 void api_cleanup() { free(global); }

@@ -4,6 +4,8 @@
 #include <concord/discord.h>
 #include <concord/discord-response.h>
 
+#define UUID_STR_LEN 32
+
 struct user {
   char* username;
   char* avatar;
@@ -23,6 +25,13 @@ struct user* user_get(unsigned long uuid);
 int user_cmp(const void* a, const void* b);
 
 void user_cleanup(void* elem);
+
+// converts uuid (unsigned long) to string.
+// string should be of length UUID_STR_LEN
+void uuid_to_string(unsigned long uuid, char* buf);
+
+// converts string to uuid (unsigned long)
+unsigned long string_to_uuid(const char* str);
 
 #endif
 
