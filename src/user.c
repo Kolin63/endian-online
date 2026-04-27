@@ -41,7 +41,7 @@ struct user* user_init(unsigned long uuid) {
 
   struct user* user = malloc(sizeof(struct user));
   user->uuid = uuid;
-  if (registry_add(regman_get()->user_registry, &user) == NULL) {
+  if (registry_add(regman_get()->user, &user) == NULL) {
     log_error("Could not initialize user %zi", uuid);
     free(user);
     pthread_rwlock_unlock(&user_lock);
@@ -85,7 +85,7 @@ struct user* user_init(unsigned long uuid) {
 struct user* user_get(unsigned long uuid) {
   pthread_rwlock_rdlock(&user_lock);
   struct user* key = &(struct user){.uuid = uuid};
-  struct user** ret_ptr = registry_ktov(regman_get()->user_registry, &key);
+  struct user** ret_ptr = registry_ktov(regman_get()->user, &key);
   if (ret_ptr == NULL) {
     pthread_rwlock_unlock(&user_lock);
     return user_init(uuid);

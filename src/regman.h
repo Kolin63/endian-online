@@ -4,10 +4,10 @@
 #include "registry.h"
 
 struct regman {
-  struct registry* plugin_registry;
-  struct registry* function_registry;
-  struct registry* command_registry;
-  struct registry* user_registry;
+  struct registry* plugin;
+  struct registry* function;
+  struct registry* command;
+  struct registry* user;
 };
 
 void regman_init();
