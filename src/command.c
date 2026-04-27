@@ -460,6 +460,9 @@ void command_options_cleanup(struct command_options* opts) {
       }
       free(opt->choices->array);
       free(opt->choices);
+    }
+
+    if (opt->channel_types != NULL) {
       free(opt->channel_types->array);
       free(opt->channel_types);
     }
@@ -469,6 +472,7 @@ void command_options_cleanup(struct command_options* opts) {
     }
   }
 
+  free(opts->options);
   free(opts);
 }
 
