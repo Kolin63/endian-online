@@ -54,12 +54,21 @@ void api_cleanup() { free(global); }
 
 const struct api* api_get_global() { return global; }
 
-// hands out api to all mod functions of type GET_API
 void api_distribute() {
   const struct registry* func_reg = regman_get_function();
   for (int i = 0; i < func_reg->length; i++) {
     const struct function* func = registry_itov(func_reg, i);
-    if (func->type != GET_API) continue;
+    if (func->type != FT_GET_API) continue;
+    func->function(global);
+  }
+}
+
+// calls all mod functions of type LOAD
+void api_call_load_func() {
+  const struct registry* func_reg = regman_get_function();
+  for (int i = 0; i < func_reg->length; i++) {
+    const struct function* func = registry_itov(func_reg, i);
+    if (func->type != FT_LOAD) continue;
     func->function(global);
   }
 }

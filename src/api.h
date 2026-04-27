@@ -121,7 +121,10 @@ void api_cleanup();
 
 const struct api* api_get_global();
 
+// hands out api to all mod functions of type GET_API
 void api_distribute();
+// calls all mod functions of type LOAD
+void api_call_load_func();
 
 #endif
 

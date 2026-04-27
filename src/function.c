@@ -31,9 +31,10 @@ int function_fillout(const char* mod_name, const char* file_name,
     if (strcmp(item_name, "type") == 0) {
       END_JSON_CHECK_STRING;
       const char* val = iter->json->valuestring;
-      if (strcmp(val, "CALLBACK") == 0) func->type = CALLBACK;
-      else if (strcmp(val, "GET_API") == 0) func->type = GET_API;
-      else if (strcmp(val, "EXPORT") == 0) func->type = EXPORT;
+      if (strcmp(val, "CALLBACK") == 0) func->type = FT_CALLBACK;
+      else if (strcmp(val, "GET_API") == 0) func->type = FT_GET_API;
+      else if (strcmp(val, "LOAD") == 0) func->type = FT_LOAD;
+      else if (strcmp(val, "EXPORT") == 0) func->type = FT_EXPORT;
       else {
         log_error("In function %s from mod %s, unknown type %s", file_name, mod_name, val);
         error++;

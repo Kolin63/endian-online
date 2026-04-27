@@ -4,9 +4,10 @@
 #include <concord/discord.h>
 
 enum function_type {
-  CALLBACK = 1,
-  GET_API = 2,
-  EXPORT = 3,
+  FT_CALLBACK,
+  FT_GET_API,
+  FT_LOAD,
+  FT_EXPORT,
 };
 
 struct function {
