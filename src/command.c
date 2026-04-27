@@ -400,7 +400,7 @@ void command_load(const struct discord_ready* event, const char* command_path,
                   const char* mod_name, const char* file_name) {
   if (strcmp(file_name, "template.json") == 0) return;
 
-  struct fileio* fileio = fileio_init();
+  char* fileio = NULL;
   FILE* file = fopen(command_path, "r");
 
   if (!file) {
@@ -408,11 +408,11 @@ void command_load(const struct discord_ready* event, const char* command_path,
     return;
   }
 
-  fileio_read_all(fileio, file);
+  fileio_read_all(&fileio, file);
 
-  cJSON* json = cJSON_Parse(fileio->buf);
+  cJSON* json = cJSON_Parse(fileio);
 
-  fileio_cleanup(fileio);
+  free(fileio);
   fclose(file);
 
   struct command params = {};

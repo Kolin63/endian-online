@@ -3,6 +3,7 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "cJSON.h"
 #include "fileio.h"
@@ -63,12 +64,12 @@ void function_load(const char* function_path, const char* mod_name, const char* 
   if (strcmp(file_name, "template.json") == 0) return;
 
   FILE* file = fopen(function_path, "r");
-  struct fileio* fileio = fileio_init();
-  fileio_read_all(fileio, file);
+  char* fileio = NULL;
+  fileio_read_all(&fileio, file);
 
-  cJSON* json = cJSON_Parse(fileio->buf);
+  cJSON* json = cJSON_Parse(fileio);
 
-  fileio_cleanup(fileio);
+  free(fileio);
   fclose(file);
 
   struct function func = {};
