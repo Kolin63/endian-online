@@ -8,6 +8,7 @@
 #include "log.h"
 #include "registry.h"
 #include "regman.h"
+#include "save.h"
 #include "user.h"
 
 // forward declaration. defined in main.c
@@ -44,6 +45,9 @@ void api_init() {
   global->user_get = user_get;
   global->uuid_to_string = uuid_to_string;
   global->string_to_uuid = string_to_uuid;
+
+  global->save_write = save_write;
+  global->save_read = save_read;
 }
 
 void api_cleanup() { free(global); }
