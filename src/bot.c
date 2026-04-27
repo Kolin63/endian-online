@@ -77,11 +77,12 @@ void on_interaction(struct discord* client, const struct discord_interaction* ev
   func->function(api_get_global(), client, event);
 }
 
-void bot_init(struct cli_args* cli_args) {
+void bot_init() {
   if (global_bot != NULL) {
     log_error("Global Bot already initialized");
     return;
   }
+  const struct cli_args* cli_args = cli_args_get_global();
   global_bot = malloc(sizeof(struct bot));
   global_bot->instance_dir = cli_args->instance_dir;
 

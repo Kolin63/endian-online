@@ -9,9 +9,11 @@ struct cli_args {
   sds instance_dir;
 };
 
-struct cli_args* cli_args_init();
-void cli_args_cleanup(struct cli_args* args);
+void cli_args_init();
+void cli_args_cleanup();
 
-void cli_args_parse(int argc, const char** argv, struct cli_args* out);
+void cli_args_parse(int argc, const char** argv);
+
+const struct cli_args* cli_args_get_global();
 
 #endif

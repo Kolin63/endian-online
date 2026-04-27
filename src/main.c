@@ -9,7 +9,6 @@
 #include "log.h"
 #include "regman.h"
 
-static struct cli_args* cli_args;
 static pthread_once_t cleanup_once = PTHREAD_ONCE_INIT;
 static volatile sig_atomic_t cleanup_ready = 0;
 
@@ -31,22 +30,22 @@ void handle_sigint(int) { handle_exit(); }
 void set_cleanup_ready() { cleanup_ready = 1; }
 
 int main(int argc, const char** argv) {
+  cli_args_init();
+  cli_args_parse(argc, argv);
+
   struct sigaction sa = {0};
   sa.sa_handler = handle_sigint;
   sigaction(SIGINT, &sa, NULL);
 
   regman_init();
-  cli_args = cli_args_init();
   api_init();
 
-  cli_args_parse(argc, argv, cli_args);
-
-  bot_init(cli_args);
+  bot_init();
   bot_start();
 
   regman_cleanup();
-  cli_args_cleanup(cli_args);
   api_cleanup();
+  cli_args_cleanup();
   bot_cleanup();
 
   log_info("Done");

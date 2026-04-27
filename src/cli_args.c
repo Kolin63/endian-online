@@ -8,24 +8,25 @@
 #include "log.h"
 #include "sds.h"
 
+static struct cli_args* global = NULL;
+
 void print_usage(const char* program_name) {
   printf("Usage: %s [-rv] <instance_name>\n", program_name);
 }
 
-struct cli_args* cli_args_init() {
-  struct cli_args* args = malloc(sizeof(struct cli_args));
-  args->instance_dir = sdsempty();
-  return args;
+void cli_args_init() {
+  global = malloc(sizeof(struct cli_args));
+  global->instance_dir = sdsempty();
 }
 
-void cli_args_cleanup(struct cli_args* args) {
-  sdsfree(args->instance_dir);
-  free(args);
+void cli_args_cleanup() {
+  sdsfree(global->instance_dir);
+  free(global);
 }
 
-void cli_args_parse(int argc, const char** argv, struct cli_args* out) {
-  out->default_root = true;
-  out->verbose = false;
+void cli_args_parse(int argc, const char** argv) {
+  global->default_root = true;
+  global->verbose = false;
 
   int req_args_passed = 0;
 
@@ -34,15 +35,15 @@ void cli_args_parse(int argc, const char** argv, struct cli_args* out) {
       for (size_t j = 1; j < strlen(argv[i]); j++) {
         switch (argv[i][j]) {
         case 'r':
-          out->default_root = false;
+          global->default_root = false;
           break;
         case 'v':
-          out->verbose = true;
+          global->verbose = true;
           break;
         }
       }
     } else {  // not a flag; the instance name
-      out->instance_dir = sdscpy(out->instance_dir, argv[i]);
+      global->instance_dir = sdscpy(global->instance_dir, argv[i]);
       req_args_passed++;
     }
   }  // done parsing args
@@ -52,20 +53,22 @@ void cli_args_parse(int argc, const char** argv, struct cli_args* out) {
     exit(EXIT_FAILURE);
   }
 
-  if (out->default_root == true) {
-    sds buf = sdsnew(out->instance_dir);
+  if (global->default_root == true) {
+    sds buf = sdsnew(global->instance_dir);
 #ifdef __linux__
     const char* home = getenv("HOME");
     if (!home) {
       log_error("Error: could not get value of $HOME");
       exit(EXIT_FAILURE);
     }
-    out->instance_dir = sdscpy(out->instance_dir, home);
-    out->instance_dir = sdscat(out->instance_dir, "/.local/share/endian/");
+    global->instance_dir = sdscpy(global->instance_dir, home);
+    global->instance_dir = sdscat(global->instance_dir, "/.local/share/endian/");
 #else
     static_assert(0, "Default root not supported on this OS");
 #endif
-    out->instance_dir = sdscat(out->instance_dir, buf);
+    global->instance_dir = sdscat(global->instance_dir, buf);
     sdsfree(buf);
   }
 }
+
+const struct cli_args* cli_args_get_global() { return global; }

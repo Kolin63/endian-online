@@ -3,15 +3,13 @@
 
 #include <concord/discord.h>
 
-#include "cli_args.h"
-
 struct bot {
   char* instance_dir;
 
   struct discord* discord_bot;
 };
 
-void bot_init(struct cli_args* cli_args);
+void bot_init();
 void bot_cleanup();
 
 struct bot* bot_get_global();
