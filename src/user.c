@@ -25,6 +25,7 @@ static enum user_init_status user_init_status = USER_INIT_STATUS_IDLE;
 static pthread_rwlock_t user_lock = PTHREAD_RWLOCK_INITIALIZER;
 
 void user_init_done(struct discord* client, struct discord_response* resp, const struct discord_user* ret) {
+  discord_user_cleanup((void*)ret); // trust me, it's for a good cause
   user_init_status = USER_INIT_STATUS_DONE;
 }
 
