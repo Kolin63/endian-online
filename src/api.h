@@ -33,7 +33,11 @@ struct api {
 
   void (*log_log)(int level, const char* file, int line, const char* fmt, ...);
 
+  // attempts exit. if cleanup is not ready, function returns
   void (*exit)();
+  // premature cleanup before everything is initialized, for example to abort
+  // the program during the cli args initialization phase
+  void (*abort_cleanup)(int code);
 
   CCORDcode (*discord_create_interaction_response)(struct discord* client, u64snowflake interaction_id,
                                                    const char interaction_token[],

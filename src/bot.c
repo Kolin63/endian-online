@@ -11,6 +11,7 @@
 #include "api.h"
 #include "cli_args.h"
 #include "command.h"
+#include "exit.h"
 #include "function.h"
 #include "log.h"
 #include "mod_loader.h"
@@ -94,7 +95,7 @@ void bot_init() {
 
   if (!token_file) {
     log_error("Could not open token file: %s", token_file_path);
-    exit(EXIT_FAILURE);
+    abort_cleanup(EXIT_FAILURE);
   }
 
   fgets(token, sizeof(token), token_file);
@@ -102,7 +103,7 @@ void bot_init() {
 
   if (strlen(token) == 0) {
     log_error("Bot token is of length 0");
-    exit(EXIT_FAILURE);
+    abort_cleanup(EXIT_FAILURE);
   }
 
   // a new line in the token breaks concord
@@ -133,7 +134,7 @@ void bot_init() {
   if (!log_file) {
     log_error("Could not open file for Endian logging at %s", log_file_path);
     sdsfree(log_file_path);
-    exit(EXIT_FAILURE);
+    abort_cleanup(EXIT_FAILURE);
   }
 
   log_add_fp(log_file, LOG_TRACE);

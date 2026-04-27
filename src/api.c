@@ -3,6 +3,7 @@
 #include <concord/interaction.h>
 #include <stdlib.h>
 
+#include "exit.h"
 #include "function.h"
 #include "log.h"
 #include "registry.h"
@@ -22,6 +23,7 @@ void api_init() {
   global->log_log = log_log;
 
   global->exit = handle_exit;
+  global->abort_cleanup = abort_cleanup;
 
   global->discord_create_interaction_response = discord_create_interaction_response;
 

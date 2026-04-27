@@ -7,6 +7,7 @@
 
 #include "log.h"
 #include "sds.h"
+#include "exit.h"
 
 static struct cli_args* global = NULL;
 
@@ -50,7 +51,7 @@ void cli_args_parse(int argc, const char** argv) {
 
   if (req_args_passed != 1) {
     print_usage(argv[0]);
-    exit(EXIT_FAILURE);
+    abort_cleanup(EXIT_FAILURE);
   }
 
   if (global->default_root == true) {
@@ -59,7 +60,7 @@ void cli_args_parse(int argc, const char** argv) {
     const char* home = getenv("HOME");
     if (!home) {
       log_error("Error: could not get value of $HOME");
-      exit(EXIT_FAILURE);
+      abort_cleanup(EXIT_FAILURE);
     }
     global->instance_dir = sdscpy(global->instance_dir, home);
     global->instance_dir = sdscat(global->instance_dir, "/.local/share/endian/");
