@@ -6,6 +6,7 @@
 enum function_type {
   FT_CALLBACK,
   FT_GET_API,
+  FT_INIT,
   FT_LOAD,
   FT_EXPORT,
 };

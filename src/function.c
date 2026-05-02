@@ -33,6 +33,7 @@ int function_fillout(const char* mod_name, const char* file_name,
       const char* val = iter->json->valuestring;
       if (strcmp(val, "CALLBACK") == 0) func->type = FT_CALLBACK;
       else if (strcmp(val, "GET_API") == 0) func->type = FT_GET_API;
+      else if (strcmp(val, "INIT") == 0) func->type = FT_INIT;
       else if (strcmp(val, "LOAD") == 0) func->type = FT_LOAD;
       else if (strcmp(val, "EXPORT") == 0) func->type = FT_EXPORT;
       else {

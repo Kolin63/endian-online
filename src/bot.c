@@ -37,7 +37,9 @@ void log_lock_func(bool lock, void* udata) {
 
 void on_ready(struct discord*, const struct discord_ready* event) {
   mod_loader_load_mods(event);
-  api_distribute();
+  api_call_get_api();
+  api_call_init();
+  api_call_load();
   set_cleanup_ready();
 }
 
