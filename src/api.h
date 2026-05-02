@@ -94,6 +94,10 @@ struct api {
   // initializes the user if it is not in registry
   struct user* (*user_get)(unsigned long uuid);
 
+  int (*user_cmp)(const void* a, const void* b);
+
+  void (*user_cleanup)(void* elem);
+
   // converts uuid (unsigned long) to string.
   // string should be of length UUID_STR_LEN
   void (*uuid_to_string)(unsigned long uuid, char* buf);
