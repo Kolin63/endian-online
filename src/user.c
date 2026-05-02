@@ -44,6 +44,7 @@ struct user* user_init(unsigned long uuid) {
   if (registry_add(regman_get()->user, &user) == NULL) {
     log_error("Could not initialize user %zi", uuid);
     free(user);
+    user_init_status = USER_INIT_STATUS_IDLE;
     pthread_rwlock_unlock(&user_lock);
     return NULL;
   }
@@ -57,6 +58,7 @@ struct user* user_init(unsigned long uuid) {
   if (user_init_status == USER_INIT_STATUS_FAIL) {
     log_error("Failed to initialize user %zi", uuid);
     free(user);
+    user_init_status = USER_INIT_STATUS_IDLE;
     pthread_rwlock_unlock(&user_lock);
     return NULL;
   }
@@ -64,6 +66,7 @@ struct user* user_init(unsigned long uuid) {
   if (user->uuid != sync.id) {
     log_error("Given UUID does not match returned UUID (%zi)", user->uuid);
     free(user);
+    user_init_status = USER_INIT_STATUS_IDLE;
     pthread_rwlock_unlock(&user_lock);
     return NULL;
   }
