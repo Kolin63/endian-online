@@ -39,6 +39,7 @@ void on_ready(struct discord*, const struct discord_ready* event) {
   api_call_init();
   api_call_load();
   set_cleanup_ready();
+  log_info("Bot started!");
 }
 
 void on_interaction(struct discord* client, const struct discord_interaction* event) {
