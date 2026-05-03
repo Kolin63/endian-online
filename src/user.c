@@ -25,7 +25,6 @@ static enum user_init_status user_init_status = USER_INIT_STATUS_IDLE;
 static pthread_rwlock_t user_lock = PTHREAD_RWLOCK_INITIALIZER;
 
 void user_init_done(struct discord* client, struct discord_response* resp, const struct discord_user* ret) {
-  discord_user_cleanup((void*)ret); // trust me, it's for a good cause
   user_init_status = USER_INIT_STATUS_DONE;
 }
 
@@ -71,12 +70,15 @@ struct user* user_init(unsigned long uuid) {
     return NULL;
   }
 
-  user->username = sync.username;
+  user->username = malloc(strlen(sync.username) + 1);
+  strcpy(user->username, sync.username);
 
   char* avatar = malloc(128);
   snprintf(avatar, 128, "https://cdn.discordapp.com/avatars/%zi/%s", uuid, sync.avatar);
   avatar = realloc(avatar, strlen(avatar) + 1);
   user->avatar = avatar;
+
+  discord_user_cleanup(&sync);
 
   user_init_status = USER_INIT_STATUS_IDLE;
 
