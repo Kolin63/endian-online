@@ -21,35 +21,35 @@ struct function {
 #ifdef ENDIAN_ENGINE
 
 void function_load(const char* function_path, const char* mod_name, const char* file_name);
+const struct function* function_get(char* name);
 
-int function_cmp(const void* a, const void* b);
+int function_cmp(const struct function* a, const struct function* b);
 
-void function_cleanup(void* elem);
+void function_cleanup(struct function* elem);
 
 // calls a function, which must be of type EXPORT. sets error to 0 if ok.
-#define function_call(name, error, ...)                             \
-  do {                                                              \
-    const struct function* func = registry_ktov(                    \
-        regman_get_function(), &(struct function){.na##me = name}); \
-    if (func == NULL) {                                             \
-      log_error("Function %s is not registered", name);             \
-      error = -1;                                                   \
-      break;                                                        \
-    }                                                               \
-    if (func->function == NULL) {                                   \
-      log_error("Handle of function %s is NULL", name);             \
-      error = -2;                                                   \
-      break;                                                        \
-    }                                                               \
-    if (func->type != EXPORT) {                                     \
-      log_error("Function %s is not an EXPORT", name);              \
-      error = -3;                                                   \
-      break;                                                        \
-    }                                                               \
-                                                                    \
-    func->function(__VA_ARGS__);                                    \
-                                                                    \
-    error = 0;                                                      \
+#define function_call(name, error, ...)                 \
+  do {                                                  \
+    const struct function* func = function_get(name);   \
+    if (func == NULL) {                                 \
+      log_error("Function %s is not registered", name); \
+      error = -1;                                       \
+      break;                                            \
+    }                                                   \
+    if (func->function == NULL) {                       \
+      log_error("Handle of function %s is NULL", name); \
+      error = -2;                                       \
+      break;                                            \
+    }                                                   \
+    if (func->type != EXPORT) {                         \
+      log_error("Function %s is not an EXPORT", name);  \
+      error = -3;                                       \
+      break;                                            \
+    }                                                   \
+                                                        \
+    func->function(__VA_ARGS__);                        \
+                                                        \
+    error = 0;                                          \
   } while (0)
 
 #endif
@@ -57,29 +57,28 @@ void function_cleanup(void* elem);
 #ifndef ENDIAN_ENGINE
 
 // calls a function, which must be of type EXPORT. sets error to 0 if ok.
-#define function_call(api, name, error, ...)                               \
-  do {                                                                     \
-    const struct function* func = api->registry_ktov(                      \
-        api->get_function_registry(), &(struct function){.na##me = name}); \
-    if (func == NULL) {                                                    \
-      log_error(api, "Function %s is not registered", name);               \
-      error = -1;                                                          \
-      break;                                                               \
-    }                                                                      \
-    if (func->function == NULL) {                                          \
-      log_error(api, "Handle of function %s is NULL", name);               \
-      error = -2;                                                          \
-      break;                                                               \
-    }                                                                      \
-    if (func->type != EXPORT) {                                            \
-      log_error(api, "Function %s is not an EXPORT", name);                \
-      error = -3;                                                          \
-      break;                                                               \
-    }                                                                      \
-                                                                           \
-    func->function(__VA_ARGS__);                                           \
-                                                                           \
-    error = 0;                                                             \
+#define function_call(api, name, error, ...)                 \
+  do {                                                       \
+    const struct function* func = api->function_get(name);   \
+    if (func == NULL) {                                      \
+      log_error(api, "Function %s is not registered", name); \
+      error = -1;                                            \
+      break;                                                 \
+    }                                                        \
+    if (func->function == NULL) {                            \
+      log_error(api, "Handle of function %s is NULL", name); \
+      error = -2;                                            \
+      break;                                                 \
+    }                                                        \
+    if (func->type != EXPORT) {                              \
+      log_error(api, "Function %s is not an EXPORT", name);  \
+      error = -3;                                            \
+      break;                                                 \
+    }                                                        \
+                                                             \
+    func->function(__VA_ARGS__);                             \
+                                                             \
+    error = 0;                                               \
   } while (0)
 
 #endif

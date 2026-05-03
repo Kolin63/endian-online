@@ -15,8 +15,6 @@
 #include "function.h"
 #include "log.h"
 #include "mod_loader.h"
-#include "registry.h"
-#include "regman.h"
 #include "sds.h"
 
 static struct bot* global_bot = NULL;
@@ -49,7 +47,7 @@ void on_interaction(struct discord* client, const struct discord_interaction* ev
 
   char* cmd_name = event->data->name;
 
-  const struct command* cmd = registry_ktov(regman_get_command(), &(struct command){.name = cmd_name});
+  const struct command* cmd = command_get(cmd_name);
 
   if (cmd == NULL) {
     log_error("Could not find command %s", cmd_name);
@@ -63,8 +61,7 @@ void on_interaction(struct discord* client, const struct discord_interaction* ev
     return;
   }
 
-  const struct function* func = registry_ktov(
-      regman_get_function(), &(struct function){.name = cmd->callback});
+  const struct function* func = function_get(cmd->callback);
   if (func == NULL) {
     log_error("In command %s, could not find callback function %s", cmd_name, cmd->callback);
     // TODO: send warning message to user via discord

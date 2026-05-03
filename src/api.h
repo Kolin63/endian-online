@@ -83,8 +83,11 @@ struct api {
   int (*registry_strcmp)(const char* a, const char* b);
 
   const struct registry* (*get_plugin_registry)();
+  const struct plugin* (*plugin_get)(char* name);
   const struct registry* (*get_function_registry)();
+  const struct function* (*function_get)(char* name);
   const struct registry* (*get_command_registry)();
+  const struct command* (*command_get)(char* name);
 
   // initializes user
   // returns pointer to user in registry
@@ -94,9 +97,9 @@ struct api {
   // initializes the user if it is not in registry
   struct user* (*user_get)(unsigned long uuid);
 
-  int (*user_cmp)(const void* a, const void* b);
+  int (*user_cmp)(struct user* const* a, struct user* const* b);
 
-  void (*user_cleanup)(void* elem);
+  void (*user_cleanup)(struct user** elem);
 
   // converts uuid (unsigned long) to string.
   // string should be of length UUID_STR_LEN

@@ -443,6 +443,10 @@ void command_load(const struct discord_ready* event, const char* command_path,
   log_info("Loading command %s from mod %s", file_name, mod_name);
 }
 
+const struct command* command_get(char* name) {
+  return registry_ktov(regman_get_command(), &(struct command){.name = name});
+}
+
 void command_options_cleanup(struct command_options* opts) {
   if (opts == NULL) return;
   for (int i = 0; i < opts->size; i++) {
@@ -476,16 +480,13 @@ void command_options_cleanup(struct command_options* opts) {
   free(opts);
 }
 
-int command_cmp(const void* a, const void* b) {
-  const struct command* x = a;
-  const struct command* y = b;
-  return registry_strcmp(x->name, y->name);
+int command_cmp(const struct command* a, const struct command* b) {
+  return registry_strcmp(a->name, b->name);
 }
 
-void command_cleanup(void* elem) {
-  struct command* cmd = elem;
-  free(cmd->name);
-  free(cmd->description);
-  free(cmd->callback);
-  command_options_cleanup(cmd->options);
+void command_cleanup(struct command* elem) {
+  free(elem->name);
+  free(elem->description);
+  free(elem->callback);
+  command_options_cleanup(elem->options);
 }

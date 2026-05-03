@@ -22,9 +22,9 @@ struct user* user_init(unsigned long uuid);
 // initializes the user if it is not in registry
 struct user* user_get(unsigned long uuid);
 
-int user_cmp(const void* a, const void* b);
+int user_cmp(struct user* const* a, struct user* const* b);
 
-void user_cleanup(void* elem);
+void user_cleanup(struct user** elem);
 
 // converts uuid (unsigned long) to string.
 // string should be of length UUID_STR_LEN

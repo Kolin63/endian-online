@@ -82,7 +82,7 @@ void function_load(const char* function_path, const char* mod_name, const char* 
 
   cJSON_Delete(json);
 
-  const struct plugin* plugin = registry_ktov(regman_get_plugin(), &(struct plugin){.name = func.plugin_name});
+  const struct plugin* plugin = plugin_get(func.plugin_name);
   if (plugin == NULL) {
     log_error("Could not find plugin %s while loading function %s from mod %s",
               func.plugin_name, func.name, mod_name);
@@ -110,14 +110,15 @@ void function_load(const char* function_path, const char* mod_name, const char* 
            func.plugin_name, mod_name);
 }
 
-int function_cmp(const void* a, const void* b) {
-  const struct function* x = a;
-  const struct function* y = b;
-  return registry_strcmp(x->name, y->name);
+const struct function* function_get(char* name) {
+  return registry_ktov(regman_get_function(), &(struct function){.name = name});
 }
 
-void function_cleanup(void* elem) {
-  struct function* func = elem;
-  free(func->name);
-  free(func->plugin_name);
+int function_cmp(const struct function* a, const struct function* b) {
+  return registry_strcmp(a->name, b->name);
+}
+
+void function_cleanup(struct function* elem) {
+  free(elem->name);
+  free(elem->plugin_name);
 }

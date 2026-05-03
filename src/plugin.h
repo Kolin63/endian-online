@@ -7,9 +7,10 @@ struct plugin {
 };
 
 void plugin_load(const char* plugin_path, const char* mod_name, const char* plugin_name);
+const struct plugin* plugin_get(char* name);
 
-int plugin_cmp(const void* a, const void* b);
+int plugin_cmp(const struct plugin* a, const struct plugin* b);
 
-void plugin_cleanup(void* elem);
+void plugin_cleanup(struct plugin* elem);
 
 #endif

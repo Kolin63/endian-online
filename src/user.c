@@ -99,21 +99,21 @@ struct user* user_get(unsigned long uuid) {
   return *ret_ptr;
 }
 
-int user_cmp(const void* a, const void* b) {
-  const struct user** x = (void*)a;
-  const struct user** y = (void*)b;
+int user_cmp(struct user* const* a, struct user* const* b) {
+  const struct user* x = *a;
+  const struct user* y = *b;
 
-  if (*x == NULL && *y == NULL) return 0;
-  else if (*x == NULL) return -1;
-  else if (*y == NULL) return 1;
+  if (x == NULL && y == NULL) return 0;
+  else if (x == NULL) return -1;
+  else if (y == NULL) return 1;
 
-  if ((*x)->uuid > (*y)->uuid) return 1;
-  else if ((*x)->uuid < (*y)->uuid) return -1;
+  if (x->uuid > y->uuid) return 1;
+  else if (x->uuid < y->uuid) return -1;
   return 0;
 }
 
-void user_cleanup(void* elem) {
-  struct user* user = *((struct user**)elem);
+void user_cleanup(struct user** elem) {
+  struct user* user = *elem;
   free(user->username);
   free(user->avatar);
   free(user);

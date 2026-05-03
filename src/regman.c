@@ -15,10 +15,10 @@ struct regman* global;
 void regman_init() {
   global = malloc(sizeof(struct regman));
 
-  global->plugin = registry_init(sizeof(struct plugin), plugin_cmp, plugin_cleanup);
-  global->function = registry_init(sizeof(struct function), function_cmp, function_cleanup);
-  global->command = registry_init(sizeof(struct command), command_cmp, command_cleanup);
-  global->user = registry_init(sizeof(struct user*), user_cmp, user_cleanup);
+  global->plugin = registry_init(sizeof(struct plugin), (void*)plugin_cmp, (void*)plugin_cleanup);
+  global->function = registry_init(sizeof(struct function), (void*)function_cmp, (void*)function_cleanup);
+  global->command = registry_init(sizeof(struct command), (void*)command_cmp, (void*)command_cleanup);
+  global->user = registry_init(sizeof(struct user*), (void*)user_cmp, (void*)user_cleanup);
 }
 
 void regman_cleanup() {

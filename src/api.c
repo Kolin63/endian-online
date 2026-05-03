@@ -10,6 +10,8 @@
 #include "regman.h"
 #include "save.h"
 #include "user.h"
+#include "command.h"
+#include "plugin.h"
 
 // forward declaration. defined in main.c
 void handle_exit();
@@ -38,8 +40,11 @@ void api_init() {
   global->registry_strcmp = registry_strcmp;
 
   global->get_plugin_registry = (void*)regman_get_plugin;
+  global->plugin_get = plugin_get;
   global->get_function_registry = (void*)regman_get_function;
+  global->function_get = function_get;
   global->get_command_registry = (void*)regman_get_command;
+  global->command_get = command_get;
 
   global->user_init = user_init;
   global->user_get = user_get;

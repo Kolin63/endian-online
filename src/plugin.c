@@ -38,14 +38,15 @@ void plugin_load(const char* plugin_path, const char* mod_name, const char* plug
   sdsfree(clean_name);
 }
 
-int plugin_cmp(const void* a, const void* b) {
-  const struct plugin* x = a;
-  const struct plugin* y = b;
-  return registry_strcmp(x->name, y->name);
+const struct plugin* plugin_get(char* name) {
+  return registry_ktov(regman_get_plugin(), &(struct plugin){.name = name});
 }
 
-void plugin_cleanup(void* elem) {
-  struct plugin* plugin = elem;
-  free(plugin->name);
-  dlclose(plugin->plugin);
+int plugin_cmp(const struct plugin* a, const struct plugin* b) {
+  return registry_strcmp(a->name, b->name);
+}
+
+void plugin_cleanup(struct plugin* elem) {
+  free(elem->name);
+  dlclose(elem->plugin);
 }
