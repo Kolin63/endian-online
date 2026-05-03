@@ -75,3 +75,5 @@ void api_call_get_api() { api_call_func_type(FT_GET_API); }
 void api_call_init() { api_call_func_type(FT_INIT); }
 
 void api_call_load() { api_call_func_type(FT_LOAD); }
+
+void api_call_cleanup() { api_call_func_type(FT_CLEANUP); }

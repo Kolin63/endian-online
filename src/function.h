@@ -9,6 +9,7 @@ enum function_type {
   FT_INIT,
   FT_LOAD,
   FT_EXPORT,
+  FT_CLEANUP,
 };
 
 struct function {

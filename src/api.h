@@ -134,6 +134,8 @@ void api_call_get_api();
 void api_call_init();
 // calls all mod functions of type LOAD
 void api_call_load();
+// calls all mod functions of type CLEANUP
+void api_call_cleanup();
 
 #endif
 

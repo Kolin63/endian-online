@@ -36,6 +36,7 @@ int function_fillout(const char* mod_name, const char* file_name,
       else if (strcmp(val, "INIT") == 0) func->type = FT_INIT;
       else if (strcmp(val, "LOAD") == 0) func->type = FT_LOAD;
       else if (strcmp(val, "EXPORT") == 0) func->type = FT_EXPORT;
+      else if (strcmp(val, "CLEANUP") == 0) func->type = FT_CLEANUP;
       else {
         log_error("In function %s from mod %s, unknown type %s", file_name, mod_name, val);
         error++;

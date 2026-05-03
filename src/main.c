@@ -25,6 +25,7 @@ int main(int argc, const char** argv) {
 
   bot_start();
 
+  api_call_cleanup();
   regman_cleanup();
   api_cleanup();
   cli_args_cleanup();
