@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
+#include <assert.h>
 
 #include "bot.h"
 #include "fileio.h"
@@ -67,7 +68,8 @@ int save_or_rom_read(const char* predir, const char* dir, const char* file, cons
     return 2;
   }
 
-  fileio_read_all(&buf, file_handle);
+  assert(buf == NULL);
+  buf = fileio_read_all(file_handle);
   fclose(file_handle);
   sdsfree(path);
   return 0;

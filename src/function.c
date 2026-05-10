@@ -65,8 +65,7 @@ void function_load(const char* function_path, const char* mod_name, const char* 
     log_error("Could not open %s at %s", file_name, function_path);
     return;
   }
-  char* json = NULL;
-  fileio_read_all(&json, file);
+  char* json = fileio_read_all(file);
   fclose(file);
 
   jsmntok_t* jsmn = fileio_read_json(json);

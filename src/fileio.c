@@ -10,20 +10,18 @@
 
 #define LINE_BUF_SIZE 65536
 
-void fileio_read_all(char** buf, FILE* file) {
-  assert(*buf == NULL);
-  char* buf_ = *buf;
-  buf_ = malloc(1);
-  buf_[0] = '\0';
+char* fileio_read_all(FILE* file) {
+  char* buf = malloc(1);
+  buf[0] = '\0';
   size_t buf_size = 1;
   char* line = malloc(LINE_BUF_SIZE);
   while (fgets(line, LINE_BUF_SIZE, file) != NULL) {
     buf_size += strlen(line);
-    buf_ = realloc(buf_, buf_size);
-    strcat(buf_, line);
+    buf = realloc(buf, buf_size);
+    strcat(buf, line);
   }
   free(line);
-  *buf = buf_;
+  return buf;
 }
 
 jsmntok_t* fileio_read_json(const char* json) {

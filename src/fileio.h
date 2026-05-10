@@ -7,7 +7,7 @@
 #include <concord/jsmn.h>
 
 // Moves all contents of file into a buffer. buf must be freed after use
-void fileio_read_all(char** buf, FILE* file);
+char* fileio_read_all(FILE* file);
 
 jsmntok_t* fileio_read_json(const char* json);
 

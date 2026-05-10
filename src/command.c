@@ -381,8 +381,7 @@ void command_load(const struct discord_ready* event, const char* command_path,
     return;
   }
 
-  char* json = NULL;
-  fileio_read_all(&json, file);
+  char* json = fileio_read_all(file);
   fclose(file);
 
   jsmntok_t* jsmn = fileio_read_json(json);
