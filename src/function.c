@@ -1,13 +1,13 @@
 #include "function.h"
 
+#include <concord/jsmn.h>
 #include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include "cJSON.h"
 #include "fileio.h"
-#include "json_iterator.h"
+#include "jsmn_iterator.h"
 #include "json_macros.h"
 #include "log.h"
 #include "plugin.h"
@@ -16,21 +16,20 @@
 
 // returns amount of errors, 0 if ok
 int function_fillout(const char* mod_name, const char* file_name,
-                     const cJSON* json, struct function* func) {
+                     const jsmntok_t* jsmn, const char* json,
+                     struct function* func) {
   int error = 0;
 
-  struct json_iterator* iter = json_iterator_init(json);
+  struct jsmn_iterator iter;
+  jsmn_iterator_init(&iter, jsmn, json);
 
-  while (true) {
-    iter = json_iterate(iter);
-    if (iter->parent == NULL) break;
-    if (iter->json == NULL) continue;
+  END_JSON_CHECK_OBJECT_AND_CHILDREN_RET(iter, return error);
 
-    const char* item_name = iter->json->string;
-
-    if (strcmp(item_name, "type") == 0) {
-      END_JSON_CHECK_STRING;
-      const char* val = iter->json->valuestring;
+  while (jsmn_iterator_next(&iter)) {
+    if (strcmp(iter.key, "type") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      char val[128];
+      jsmn_iterator_get_string(val, 128, json, iter.val);
       if (strcmp(val, "CALLBACK") == 0) func->type = FT_CALLBACK;
       else if (strcmp(val, "GET_API") == 0) func->type = FT_GET_API;
       else if (strcmp(val, "INIT") == 0) func->type = FT_INIT;
@@ -42,24 +41,19 @@ int function_fillout(const char* mod_name, const char* file_name,
         error++;
         continue;
       }
-    } else if (strcmp(item_name, "name") == 0) {
-      END_JSON_CHECK_STRING;
-      func->name = malloc(strlen(iter->json->valuestring) + 1);
-      strcpy(func->name, iter->json->valuestring);
-    } else if (strcmp(item_name, "plugin") == 0) {
-      END_JSON_CHECK_STRING;
-      func->plugin_name = malloc(strlen(iter->json->valuestring) + 1);
-      strcpy(func->plugin_name, iter->json->valuestring);
+    } else if (strcmp(iter.key, "name") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      func->name = jsmn_iterator_get_string_heap(json, iter.val);
+    } else if (strcmp(iter.key, "plugin") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      func->plugin_name = jsmn_iterator_get_string_heap(json, iter.val);
     } else {
-      log_error("Function %s from mod %s has unknown object %s", file_name, mod_name, iter->json->string);
-      if (iter->json->type == cJSON_Array || iter->json->type == cJSON_Object)
-        iter = json_iterator_skip_object(iter);
+      log_error("Function %s from mod %s has unknown object %s", file_name, mod_name, iter.key);
       error++;
       continue;
     }
   }
 
-  json_iterator_cleanup(iter);
   return error;
 }
 
@@ -67,21 +61,25 @@ void function_load(const char* function_path, const char* mod_name, const char* 
   if (strcmp(file_name, "template.json") == 0) return;
 
   FILE* file = fopen(function_path, "r");
-  char* fileio = NULL;
-  fileio_read_all(&fileio, file);
-
-  cJSON* json = cJSON_Parse(fileio);
-
-  free(fileio);
+  if (file == NULL) {
+    log_error("Could not open %s at %s", file_name, function_path);
+    return;
+  }
+  char* json = NULL;
+  fileio_read_all(&json, file);
   fclose(file);
 
+  jsmntok_t* jsmn = fileio_read_json(json);
+
   struct function func = {};
-  if (function_fillout(mod_name, file_name, json, &func) != 0) {
-    cJSON_Delete(json);
+  if (function_fillout(mod_name, file_name, jsmn, json, &func) != 0) {
+    free(json);
+    free(jsmn);
     return;
   }
 
-  cJSON_Delete(json);
+  free(json);
+  free(jsmn);
 
   const struct plugin* plugin = plugin_get(func.plugin_name);
   if (plugin == NULL) {

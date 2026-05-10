@@ -4,21 +4,24 @@
 #include <concord/application_command.h>
 #include <concord/discord.h>
 #include <concord/discord_codecs.h>
+#include <concord/jsmn.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
+#define JSMN_HEADER
+#include <concord/jsmn.h>
+
 #include "bot.h"
-#include "cJSON.h"
 #include "command.h"
 #include "fileio.h"
 #include "function.h"
-#include "json_iterator.h"
 #include "json_macros.h"
 #include "log.h"
 #include "registry.h"
 #include "regman.h"
+#include "jsmn_iterator.h"
 
 // converts endian command options to concord command options
 struct discord_application_command_options* command_options_end_to_conc(const struct command_options* end) {
@@ -55,93 +58,88 @@ void discord_application_command_options_cleanup(struct discord_application_comm
 }
 
 // returns amount of errors, 0 if ok
-// json should point to the root of the choices array
-int command_option_choices_fillout(const char* mod_name, const char* file_name, const cJSON* json,
+// jsmn should point to the root of the choices array
+int command_option_choices_fillout(const char* mod_name, const char* file_name,
+                                   const jsmntok_t* jsmn, const char* json,
                                    struct discord_application_command_option_choices* choices) {
   int error = 0;
 
-  END_JSON_CHECK_ROOT_ARRAY;
+  struct jsmn_iterator arr_iter = {};
+  jsmn_iterator_init(&arr_iter, jsmn, json);
 
-  struct json_iterator* iter = json_iterator_init(json);
+  END_JSON_CHECK_ARRAY_AND_CHILDREN_RET(arr_iter, return error);
 
-  while (true) {
-    iter = json_iterate(iter);
-    if (iter->parent == NULL) break;
-    if (iter->json == NULL) continue;
+  /* a choice is like this:
+     {
+       "name": "Foo",
+       "value": "foo"
+     }
+   */
 
-    if (iter->json->type == cJSON_Object) {
-      END_JSON_CHECK_OBJECT_AND_CHILDREN;
-      choices->size++;
-      choices->array = reallocarray(choices->array, choices->size, sizeof(struct discord_application_command_option_choice));
-      struct discord_application_command_option_choice* i = &(choices->array[choices->size - 1]);
-      i->name = NULL;
-      i->value = NULL;
-    } else if (iter->json->type == cJSON_String) {
-      END_JSON_CHECK_STRING;
-      END_JSON_CHECK_STRING_LENGTH(1, 100);
-      if (choices->size == 0 || iter->parent == NULL || iter->parent->parent == NULL) {
-        log_error("In command %s from mod %s, %s must be object", file_name, mod_name, json->string);
-        error++;
-        continue;
-      }
+  while (jsmn_iterator_next(&arr_iter)) {
+    // one choice is an object. going through the array, if there is a
+    // non-object item, error
+    END_JSON_CHECK_OBJECT_AND_CHILDREN(arr_iter);
+
+    choices->size++;
+    choices->array = reallocarray(choices->array, choices->size,
+                                  sizeof(struct discord_application_command_option_choice));
+
+    struct discord_application_command_option_choice* i = &(choices->array[choices->size - 1]);
+    i->name = NULL;
+    i->value = NULL;
+
+    // now iterate through the values of the choice object
+    struct jsmn_iterator obj_iter;
+    jsmn_iterator_init(&obj_iter, arr_iter.val, json);
+
+    while (jsmn_iterator_next(&obj_iter)) {
+      END_JSON_CHECK_STRING(obj_iter);
+      END_JSON_CHECK_STRING_LENGTH(obj_iter, 1, 100);
 
       struct discord_application_command_option_choice* i = &(choices->array[choices->size - 1]);
       if (i->name != NULL || i->value != NULL) {
-        log_error("In command %s from mod %s, choices is wrong size", file_name, mod_name, json->string);
+        log_error("In command %s from mod %s, choices is wrong size", file_name, mod_name);
         error++;
         continue;
       }
 
-      if (strcmp(iter->json->string, "name") == 0) {
-        const char* new = iter->json->valuestring;
-        i->name = malloc(strlen(new) + 1);
-        strcpy(i->name, new);
-      } else if (strcmp(iter->json->string, "value") == 0) {
-        const char* new = iter->json->valuestring;
-        i->value = malloc(strlen(new) + 1);
-        strcpy(i->value, new);
+      if (strcmp(obj_iter.key, "name") == 0) {
+        i->name = jsmn_iterator_get_string_heap(json, obj_iter.val);
+      } else if (strcmp(obj_iter.key, "value") == 0) {
+        i->value = jsmn_iterator_get_string_heap(json, obj_iter.val);
       } else {
         log_error("Command choice from command %s from mod %s has unknown object %s",
-                  file_name, mod_name, iter->json->string);
+                  file_name, mod_name, obj_iter.key);
         error++;
         continue;
       }
-    } else {
-      log_error("Command choice from command %s from mod %s has unknown object %s",
-                file_name, mod_name, iter->json->string);
-      if (iter->json->type == cJSON_Array)
-        iter = json_iterator_skip_object(iter);
-      error++;
-      continue;
     }
   }
-
-  json_iterator_cleanup(iter);
-
   return error;
 }
 
 // returns amount of errors, 0 if ok
-// json should point to the root of the channel_types array
+// jsmn should point to the root of the channel_types array
 int command_option_channel_types_fillout(const char* mod_name,
                                          const char* file_name,
-                                         const cJSON* json,
+                                         const jsmntok_t* jsmn,
+                                         const char* json,
                                          struct integers* channel_types) {
   int error = 0;
 
-  END_JSON_CHECK_ROOT_ARRAY;
+  // iterates over array of strings
+  struct jsmn_iterator iter;
+  jsmn_iterator_init(&iter, jsmn, json);
 
-  struct json_iterator* iter = json_iterator_init(json);
+  END_JSON_CHECK_ARRAY_AND_CHILDREN_RET(iter, return error);
 
-  while (true) {
-    iter = json_iterate(iter);
-    if (iter->parent == NULL) break;
-    if (iter->json == NULL) continue;
+  while (jsmn_iterator_next(&iter)) {
+    END_JSON_CHECK_STRING(iter);
+    END_JSON_CHECK_STRING_LENGTH(iter, 1, 100);
 
-    END_JSON_CHECK_STRING;
-    END_JSON_CHECK_STRING_LENGTH(1, 100);
-
-    const char* val = iter->json->valuestring;
+    char val[32];
+    jsmn_iterator_get_string(val, 128, json, iter.val);
     int type;
 
     if (strcmp(val, "GUILD_TEXT") == 0) type = 0;
@@ -173,29 +171,30 @@ int command_option_channel_types_fillout(const char* mod_name,
 
 // (forward declaration)
 // returns amount of errors, 0 if ok
-// json should point to the root of the options array
+// jsmn should point to the root of the options array
 int command_options_fillout(const char* mod_name, const char* file_name,
-                            const cJSON* json, struct command_options* opts);
+                            const jsmntok_t* jsmn, const char* json,
+                            struct command_options* opts);
 
 // returns amount of errors, 0 if ok
-// json should point to the root of the option
+// jsmn should point to the root of the option
 int command_option_fillout(const char* mod_name, const char* file_name,
-                           const cJSON* json, struct command_option* opt) {
+                           const jsmntok_t* jsmn, const char* json,
+                           struct command_option* opt) {
   int error = 0;
 
-  struct json_iterator* iter = json_iterator_init(json);
+  struct jsmn_iterator iter;
+  jsmn_iterator_init(&iter, jsmn, json);
 
-  while (true) {
-    iter = json_iterate(iter);
-  loop_no_iterate:
-    if (iter->parent == NULL) break;
-    if (iter->json == NULL) continue;
+  END_JSON_CHECK_OBJECT_AND_CHILDREN_RET(iter, return error);
 
-    const char* item_name = iter->json->string;
+  while (jsmn_iterator_next(&iter)) {
+    if (strcmp(iter.key, "type") == 0) {
+      END_JSON_CHECK_STRING(iter);
 
-    if (strcmp(item_name, "type") == 0) {
-      END_JSON_CHECK_STRING;
-      const char* val = iter->json->valuestring;
+      char val[32];
+      jsmn_iterator_get_string(val, 32, json, iter.val);
+
       if (strcmp(val, "SUB_COMMAND") == 0) opt->type = DISCORD_APPLICATION_OPTION_SUB_COMMAND;
       else if (strcmp(val, "SUB_COMMAND_GROUP") == 0) opt->type = DISCORD_APPLICATION_OPTION_SUB_COMMAND_GROUP;
       else if (strcmp(val, "STRING") == 0) opt->type = DISCORD_APPLICATION_OPTION_STRING;
@@ -212,62 +211,54 @@ int command_option_fillout(const char* mod_name, const char* file_name,
         error++;
         continue;
       }
-    } else if (strcmp(item_name, "name") == 0) {
-      END_JSON_CHECK_STRING;
-      END_JSON_CHECK_STRING_LENGTH(1, 32);
-      opt->name = malloc(strlen(iter->json->valuestring) + 1);
-      strcpy(opt->name, iter->json->valuestring);
-    } else if (strcmp(item_name, "description") == 0) {
-      END_JSON_CHECK_STRING;
-      END_JSON_CHECK_STRING_LENGTH(1, 100);
-      opt->description = malloc(strlen(iter->json->valuestring) + 1);
-      strcpy(opt->description, iter->json->valuestring);
-    } else if (strcmp(item_name, "required") == 0) {
-      END_JSON_CHECK_BOOL;
-      opt->required = (iter->json->type == cJSON_True);
-    } else if (strcmp(item_name, "min_value") == 0) {
-      END_JSON_CHECK_STRING;
-      opt->min_value = malloc(strlen(iter->json->valuestring) + 1);
-      strcpy(opt->min_value, iter->json->valuestring);
-    } else if (strcmp(item_name, "max_value") == 0) {
-      END_JSON_CHECK_STRING;
-      opt->max_value = malloc(strlen(iter->json->valuestring) + 1);
-      strcpy(opt->max_value, iter->json->valuestring);
-    } else if (strcmp(item_name, "autocomplete") == 0) {
-      END_JSON_CHECK_BOOL;
-      opt->autocomplete = (iter->json->type == cJSON_True);
-    } else if (strcmp(item_name, "options") == 0) {
-      END_JSON_CHECK_ARRAY_AND_CHILDREN;
+    } else if (strcmp(iter.key, "name") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      END_JSON_CHECK_STRING_LENGTH(iter, 1, 32);
+      opt->name = jsmn_iterator_get_string_heap(json, iter.val);
+    } else if (strcmp(iter.key, "description") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      END_JSON_CHECK_STRING_LENGTH(iter, 1, 100);
+      opt->description = jsmn_iterator_get_string_heap(json, iter.val);
+    } else if (strcmp(iter.key, "required") == 0) {
+      END_JSON_CHECK_BOOL(iter);
+      char val[2];
+      jsmn_iterator_get_string(val, 2, json, iter.val);
+      opt->required = (val[0] == 't');
+    } else if (strcmp(iter.key, "min_value") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      opt->min_value = jsmn_iterator_get_string_heap(json, iter.val);
+    } else if (strcmp(iter.key, "max_value") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      opt->max_value = jsmn_iterator_get_string_heap(json, iter.val);
+    } else if (strcmp(iter.key, "autocomplete") == 0) {
+      END_JSON_CHECK_BOOL(iter);
+      char val[2];
+      jsmn_iterator_get_string(val, 2, json, iter.val);
+      opt->autocomplete = (val[0] == 't');
+    } else if (strcmp(iter.key, "options") == 0) {
+      END_JSON_CHECK_ARRAY_AND_CHILDREN(iter);
       opt->options = malloc(sizeof(struct command_options));
       opt->options->options = NULL;
       opt->options->size = 0;
-      command_options_fillout(mod_name, file_name, iter->json, opt->options);
-      iter = json_iterator_skip_object(iter);
-      goto loop_no_iterate;
-    } else if (strcmp(item_name, "choices") == 0) {
-      END_JSON_CHECK_ARRAY_AND_CHILDREN;
+      error += command_options_fillout(mod_name, file_name, iter.val, json, opt->options);
+    } else if (strcmp(iter.key, "choices") == 0) {
+      END_JSON_CHECK_ARRAY_AND_CHILDREN(iter);
       opt->choices = malloc(sizeof(struct discord_application_command_option_choices));
       opt->choices->array = NULL;
       opt->choices->size = 0;
-      error += command_option_choices_fillout(mod_name, file_name, iter->json, opt->choices);
-      goto loop_no_iterate;
-    } else if (strcmp(item_name, "channel_types") == 0) {
-      END_JSON_CHECK_ARRAY_AND_CHILDREN;
+      error += command_option_choices_fillout(mod_name, file_name, iter.val, json, opt->choices);
+    } else if (strcmp(iter.key, "channel_types") == 0) {
+      END_JSON_CHECK_ARRAY_AND_CHILDREN(iter);
       opt->channel_types = malloc(sizeof(struct integers));
       opt->channel_types->array = NULL;
       opt->channel_types->size = 0;
-      error += command_option_channel_types_fillout(mod_name, file_name, iter->json, opt->channel_types);
-      goto loop_no_iterate;
+      error += command_option_channel_types_fillout(mod_name, file_name, iter.val, json, opt->channel_types);
     } else {
-      log_error("In command %s from mod %s, unknown object %s", file_name, mod_name, iter->json->string);
-      if (iter->json->type == cJSON_Array || iter->json->type == cJSON_Object)
-        iter = json_iterator_skip_object(iter);
+      log_error("In command %s from mod %s, unknown object %s", file_name, mod_name, iter.key);
       error++;
       continue;
     }
   }
-
-  json_iterator_cleanup(iter);
 
   return error;
 }
@@ -275,44 +266,35 @@ int command_option_fillout(const char* mod_name, const char* file_name,
 // returns amount of errors, 0 if ok
 // json should point to the root of the options array
 int command_options_fillout(const char* mod_name, const char* file_name,
-                            const cJSON* json, struct command_options* opts) {
+                            const jsmntok_t* jsmn, const char* json,
+                            struct command_options* opts) {
   int error = 0;
 
-  if (json->type != cJSON_Array) {
-    log_error("In command %s from mod %s, %s must be array", file_name, mod_name, json->string);
-    error++;
-    return error;
-  }
-  if (json->child == NULL) {
-    log_error("In command %s from mod %s, %s has no children", file_name, mod_name, json->string);
-    error++;
-    return error;
-  }
+  struct jsmn_iterator iter;
+  jsmn_iterator_init(&iter, jsmn, json);
 
-  cJSON* i = json->child;
+  END_JSON_CHECK_ARRAY_AND_CHILDREN_RET(iter, return error);
 
-  while (i != NULL) {
-    if (i->type != cJSON_Object) {
-      log_error("In option %s from mod %s, %s must be object", file_name, mod_name, i->string);
+  while (jsmn_iterator_next(&iter)) {
+    if (iter.val->type != JSMN_OBJECT) {
+      log_error("In option %s from mod %s, %s must be object", file_name, mod_name, iter.key);
       error++;
       continue;
     }
-    if (i->child == NULL) {
-      log_error("In option %s from mod %s, %s has no children", file_name, mod_name, i->string);
+    if (iter.val->size == 0) {
+      log_error("In option %s from mod %s, %s has no children", file_name, mod_name, iter.key);
       error++;
       continue;
     }
 
     struct command_option opt = {};
-    int this_error = command_option_fillout(mod_name, file_name, i, &opt);
+    int this_error = command_option_fillout(mod_name, file_name, iter.val, json, &opt);
     error += this_error;
     if (this_error == 0) {
       opts->size++;
       opts->options = reallocarray(opts->options, opts->size, sizeof(struct command_option));
       opts->options[opts->size - 1] = opt;
     }
-
-    i = i->next;
   }
 
   return error;
@@ -320,22 +302,20 @@ int command_options_fillout(const char* mod_name, const char* file_name,
 
 // returns amount of errors, 0 if ok
 int command_fillout(const char* mod_name, const char* file_name,
-                    const cJSON* json, struct command* params) {
+                    const jsmntok_t* jsmn, const char* json,
+                    struct command* params) {
   int error = 0;
 
-  struct json_iterator* iter = json_iterator_init(json);
+  struct jsmn_iterator iter;
+  jsmn_iterator_init(&iter, jsmn, json);
 
-  while (true) {
-    iter = json_iterate(iter);
-  loop_no_iterate:
-    if (iter->parent == NULL) break;
-    if (iter->json == NULL) continue;
+  END_JSON_CHECK_OBJECT_AND_CHILDREN_RET(iter, return error);
 
-    const char* item_name = iter->json->string;
-
-    if (strcmp(item_name, "type") == 0) {
-      END_JSON_CHECK_STRING;
-      const char* val = iter->json->valuestring;
+  while (jsmn_iterator_next(&iter)) {
+    if (strcmp(iter.key, "type") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      char val[16];
+      jsmn_iterator_get_string(val, 16, json, iter.val);
       if (strcmp(val, "CHAT_INPUT") == 0) params->type = DISCORD_APPLICATION_CHAT_INPUT;
       else if (strcmp(val, "USER") == 0) params->type = DISCORD_APPLICATION_USER;
       else if (strcmp(val, "MESSAGE") == 0) params->type = DISCORD_APPLICATION_MESSAGE;
@@ -344,55 +324,49 @@ int command_fillout(const char* mod_name, const char* file_name,
         error++;
         continue;
       }
-    } else if (strcmp(item_name, "name") == 0) {
-      END_JSON_CHECK_STRING;
-      END_JSON_CHECK_STRING_LENGTH(1, 32);
-      params->name = malloc(strlen(iter->json->valuestring) + 1);
-      strcpy(params->name, iter->json->valuestring);
-    } else if (strcmp(item_name, "description") == 0) {
-      END_JSON_CHECK_STRING;
-      END_JSON_CHECK_STRING_LENGTH(1, 100);
-      params->description = malloc(strlen(iter->json->valuestring) + 1);
-      strcpy(params->description, iter->json->valuestring);
-    } else if (strcmp(item_name, "default_member_permissions") == 0) {
-      END_JSON_CHECK_STRING;
-      char* endptr = iter->json->valuestring;
+    } else if (strcmp(iter.key, "name") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      END_JSON_CHECK_STRING_LENGTH(iter, 1, 32);
+      params->name = jsmn_iterator_get_string_heap(json, iter.val);
+    } else if (strcmp(iter.key, "description") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      END_JSON_CHECK_STRING_LENGTH(iter, 1, 100);
+      params->description = jsmn_iterator_get_string_heap(json, iter.val);
+    } else if (strcmp(iter.key, "default_member_permissions") == 0) {
+      END_JSON_CHECK_NUMBER(iter);
+      char val[32];
+      jsmn_iterator_get_string(val, 32, json, iter.val);
+      char* endptr = val;
       errno = 0;
-      unsigned long perms = strtoul(iter->json->valuestring, &endptr, 10);
+      unsigned long perms = strtoul(val, &endptr, 10);
       if (errno != 0 || *endptr != '\0') {
         log_error("In command %s from mod %s, error reading default_member_permissions", file_name, mod_name);
         error++;
         continue;
       }
       params->default_member_permissions = perms;
-    } else if (strcmp(item_name, "callback") == 0) {
-      END_JSON_CHECK_STRING;
-      char* func = iter->json->valuestring;
-      if (registry_ktoi(regman_get_function(), &(struct function){.name = iter->json->valuestring}) == -1) {
+    } else if (strcmp(iter.key, "callback") == 0) {
+      END_JSON_CHECK_STRING(iter);
+      char* func = jsmn_iterator_get_string_heap(json, iter.val);
+      if (registry_ktoi(regman_get_function(), &(struct function){.name = func}) == -1) {
         log_error("In command %s from mod %s, function %s not registered", file_name, mod_name, func);
         error++;
         continue;
       }
-      params->callback = malloc(strlen(func) + 1);
-      strcpy(params->callback, func);
-    } else if (strcmp(item_name, "options") == 0) {
-      END_JSON_CHECK_ARRAY_AND_CHILDREN;
+      params->callback = func;
+    } else if (strcmp(iter.key, "options") == 0) {
+      END_JSON_CHECK_ARRAY_AND_CHILDREN(iter);
       params->options = malloc(sizeof(struct command_options));
       params->options->options = NULL;
       params->options->size = 0;
-      command_options_fillout(mod_name, file_name, iter->json, params->options);
-      iter = json_iterator_skip_object(iter);
-      goto loop_no_iterate;
+      command_options_fillout(mod_name, file_name, iter.val, json, params->options);
     } else {
-      log_error("Command %s from mod %s has unknown object %s", file_name, mod_name, iter->json->string);
-      if (iter->json->type == cJSON_Array || iter->json->type == cJSON_Object)
-        iter = json_iterator_skip_object(iter);
+      log_error("Command %s from mod %s has unknown object %s", file_name, mod_name, iter.key);
       error++;
       continue;
     }
   }
 
-  json_iterator_cleanup(iter);
   return error;
 }
 
@@ -400,7 +374,6 @@ void command_load(const struct discord_ready* event, const char* command_path,
                   const char* mod_name, const char* file_name) {
   if (strcmp(file_name, "template.json") == 0) return;
 
-  char* fileio = NULL;
   FILE* file = fopen(command_path, "r");
 
   if (!file) {
@@ -408,22 +381,23 @@ void command_load(const struct discord_ready* event, const char* command_path,
     return;
   }
 
-  fileio_read_all(&fileio, file);
-
-  cJSON* json = cJSON_Parse(fileio);
-
-  free(fileio);
+  char* json = NULL;
+  fileio_read_all(&json, file);
   fclose(file);
 
+  jsmntok_t* jsmn = fileio_read_json(json);
+
   struct command params = {};
-  if (command_fillout(mod_name, file_name, json, &params) != 0) {
-    cJSON_Delete(json);
+  if (command_fillout(mod_name, file_name, jsmn, json, &params) != 0) {
+    free(json);
+    free(jsmn);
     return;
   }
 
-  cJSON_Delete(json);
+  free(json);
+  free(jsmn);
 
-  if (registry_add(regman_get_command(), (void*)&params) == NULL) {
+  if (registry_add(regman_get_command(), &params) == NULL) {
     log_error("Command %s already registered", file_name);
     return;
   };

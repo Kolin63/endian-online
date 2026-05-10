@@ -1,8 +1,12 @@
 #include "fileio.h"
 
 #include <assert.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define JSMN_HEADER
+#include <concord/jsmn.h>
 
 #define LINE_BUF_SIZE 65536
 
@@ -20,4 +24,29 @@ void fileio_read_all(char** buf, FILE* file) {
   }
   free(line);
   *buf = buf_;
+}
+
+jsmntok_t* fileio_read_json(const char* json) {
+  size_t json_len = strlen(json);
+
+  jsmn_parser parser;
+  size_t len = 128;
+
+  jsmntok_t* tokens = NULL;
+
+  while (true) {
+    jsmn_init(&parser);
+    tokens = realloc(tokens, len * sizeof(jsmntok_t));
+    int err = jsmn_parse(&parser, json, json_len, tokens, len);
+
+    if (err >= 0) {
+      return tokens;
+    } else if (err == JSMN_ERROR_NOMEM) {
+      len += 128;
+      continue;
+    } else {
+      free(tokens);
+      return NULL;
+    }
+  }
 }
