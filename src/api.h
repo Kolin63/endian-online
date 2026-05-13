@@ -45,6 +45,7 @@ struct api {
   void (*abort_cleanup)(int code);
   // returns 0 if cleanup is not ready, 1 if it is. set to 1 after mod loading
   // and init/load functions are called
+  //
   // int get_cleanup_ready();
   int (*get_cleanup_ready)();
 
