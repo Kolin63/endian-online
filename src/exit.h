@@ -9,6 +9,10 @@ void handle_sigint(int);
 // everything has been initialized and a full cleanup can happen
 void set_cleanup_ready();
 
+// returns 0 if cleanup is not ready, 1 if it is. set to 1 after mod loading
+// and init/load functions are called
+int get_cleanup_ready();
+
 // premature cleanup before everything is initialized, for example to abort
 // the program during the cli args initialization phase
 void abort_cleanup(int code);

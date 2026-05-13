@@ -43,6 +43,10 @@ struct api {
   //
   // void abort_cleanup(int code);
   void (*abort_cleanup)(int code);
+  // returns 0 if cleanup is not ready, 1 if it is. set to 1 after mod loading
+  // and init/load functions are called
+  // int get_cleanup_ready();
+  int (*get_cleanup_ready)();
 
   // CCORDcode discord_create_interaction_response(struct discord* client, u64snowflake interaction_id,
   //                                                  const char interaction_token[],

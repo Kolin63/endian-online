@@ -28,7 +28,9 @@ void handle_exit() {
   pthread_once(&cleanup_once, cleanup);
 }
 void handle_sigint(int) { handle_exit(); }
+
 void set_cleanup_ready() { cleanup_ready = 1; }
+int get_cleanup_ready() { return cleanup_ready; }
 
 void abort_cleanup(int code) {
   if (cli_args_get_global() == NULL) exit(code);

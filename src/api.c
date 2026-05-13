@@ -27,6 +27,7 @@ void api_init() {
 
   global->exit = handle_exit;
   global->abort_cleanup = abort_cleanup;
+  global->get_cleanup_ready = get_cleanup_ready;
 
   global->discord_create_interaction_response = discord_create_interaction_response;
 
