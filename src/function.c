@@ -150,4 +150,5 @@ int function_cmp(const struct function* a, const struct function* b) {
 void function_cleanup(struct function* elem) {
   free(elem->name);
   free(elem->plugin_name);
+  free(elem->plugin_namespace);
 }
