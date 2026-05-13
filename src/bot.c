@@ -22,6 +22,8 @@ static struct bot* global_bot = NULL;
 static FILE* log_file = NULL;
 static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
 
+static pthread_mutex_t on_ready_lock = PTHREAD_MUTEX_INITIALIZER;
+
 // forward declaration
 void set_cleanup_ready();
 
@@ -34,12 +36,22 @@ void log_lock_func(bool lock, void* udata) {
 }
 
 void on_ready(struct discord*, const struct discord_ready* event) {
+  pthread_mutex_lock(&on_ready_lock);
+
+  if (get_cleanup_ready() == 1) {
+    log_warn("on_ready() called after first time");
+    pthread_mutex_unlock(&on_ready_lock);
+    return;
+  }
+
   mod_loader_load_mods(event);
   api_call_get_api();
   api_call_init();
   api_call_load();
   set_cleanup_ready();
   log_info("Bot started!");
+
+  pthread_mutex_unlock(&on_ready_lock);
 }
 
 void on_interaction(struct discord* client, const struct discord_interaction* event) {
