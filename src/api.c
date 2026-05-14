@@ -23,7 +23,7 @@ void api_init() {
 
   global->log_log = log_log;
 
-  global->exit = handle_exit;
+  global->handle_exit = handle_exit;
   global->abort_cleanup = abort_cleanup;
   global->get_cleanup_ready = get_cleanup_ready;
 
@@ -68,7 +68,8 @@ void api_call_func_type(enum function_type type) {
   for (int i = 0; i < func_reg->length; i++) {
     const struct function* func = registry_itov(func_reg, i);
     if (func->type != type) continue;
-    func->function(global);
+    if (type == FT_GET_API) func->function(global);
+    else func->function();
   }
 }
 

@@ -84,7 +84,7 @@ void on_interaction(struct discord* client, const struct discord_interaction* ev
     return;
   }
 
-  func->function(api_get_global(), client, event);
+  func->function(client, event);
 }
 
 void bot_init() {

@@ -29,6 +29,8 @@ int function_cmp(const struct function* a, const struct function* b);
 
 void function_cleanup(struct function* elem);
 
+#endif
+
 // calls a function, which must be of type EXPORT. sets error to 0 if ok.
 #define function_call(name, error, ...)                 \
   do {                                                  \
@@ -53,36 +55,5 @@ void function_cleanup(struct function* elem);
                                                         \
     error = 0;                                          \
   } while (0)
-
-#endif
-
-#ifndef ENDIAN_ENGINE
-
-// calls a function, which must be of type EXPORT. sets error to 0 if ok.
-#define function_call(api, name, error, ...)                 \
-  do {                                                       \
-    const struct function* func = api->function_get(name);   \
-    if (func == NULL) {                                      \
-      log_error(api, "Function %s is not registered", name); \
-      error = -1;                                            \
-      break;                                                 \
-    }                                                        \
-    if (func->function == NULL) {                            \
-      log_error(api, "Handle of function %s is NULL", name); \
-      error = -2;                                            \
-      break;                                                 \
-    }                                                        \
-    if (func->type != EXPORT) {                              \
-      log_error(api, "Function %s is not an EXPORT", name);  \
-      error = -3;                                            \
-      break;                                                 \
-    }                                                        \
-                                                             \
-    func->function(__VA_ARGS__);                             \
-                                                             \
-    error = 0;                                               \
-  } while (0)
-
-#endif
 
 #endif

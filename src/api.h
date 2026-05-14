@@ -19,13 +19,6 @@ enum {
 #define ENDIAN_DEF_STR_(x) #x
 #define ENDIAN_DEF_STR(x) ENDIAN_DEF_STR_(x)
 
-#define log_trace(api, ...) api->log_log(LOG_TRACE, ENDIAN_DEF_STR(MOD_NAME) ":" __FILE_NAME__, __LINE__, __VA_ARGS__)
-#define log_debug(api, ...) api->log_log(LOG_DEBUG, ENDIAN_DEF_STR(MOD_NAME) ":" __FILE_NAME__, __LINE__, __VA_ARGS__)
-#define log_info(api, ...) api->log_log(LOG_INFO, ENDIAN_DEF_STR(MOD_NAME) ":" __FILE_NAME__, __LINE__, __VA_ARGS__)
-#define log_warn(api, ...) api->log_log(LOG_WARN, ENDIAN_DEF_STR(MOD_NAME) ":" __FILE_NAME__, __LINE__, __VA_ARGS__)
-#define log_error(api, ...) api->log_log(LOG_ERROR, ENDIAN_DEF_STR(MOD_NAME) ":" __FILE_NAME__, __LINE__, __VA_ARGS__)
-#define log_fatal(api, ...) api->log_log(LOG_FATAL, ENDIAN_DEF_STR(MOD_NAME) ":" __FILE_NAME__, __LINE__, __VA_ARGS__)
-
 #endif
 
 struct api {
@@ -36,8 +29,8 @@ struct api {
 
   // attempts exit. if cleanup is not ready, function returns
   //
-  // void exit();
-  void (*exit)();
+  // void handle_exit();
+  void (*handle_exit)();
   // premature cleanup before everything is initialized, for example to abort
   // the program during the cli args initialization phase
   //
