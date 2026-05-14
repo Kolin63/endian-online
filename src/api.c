@@ -48,6 +48,8 @@ void api_init() {
   global->get_command_registry = (void*)regman_get_command;
   global->command_get = command_get;
 
+  global->bot_get_global = bot_get_global;
+
   global->user_init = user_init;
   global->user_get = user_get;
   global->user_cmp = user_cmp;

@@ -9,10 +9,15 @@ struct bot {
   struct discord* discord_bot;
 };
 
+#ifdef ENDIAN_ENGINE
+
 void bot_init();
 void bot_cleanup();
 
-struct bot* bot_get_global();
 void bot_start();
+
+#endif
+
+struct bot* bot_get_global();
 
 #endif
