@@ -24,19 +24,64 @@ int save_read(const char* dir, const char* file, const char* ext, char** out);
 
 #endif
 
-// calls 'function_arg' for every top level file or directory in 'directory_arg'
-// for every namespace 'namespace_arg' in all loaded mods
-//
-// parameters:
-// * namespace_arg    - const char*
-// * directory_arg    - const char*
-// * function_arg     - expression
-//
-// these variables are available to be used as arguments in the function call
-// for 'function_arg':
-// * file_name        - const char*
-// * file_path        - const char*
+#define dir_load(directory_arg, function_arg)                                  \
+  /*                                                                           \
+    calls 'function_arg' for every top level file or directory in              \
+    'directory_arg' (which is relative to file system root)                    \
+    .                                                                          \
+    parameters:                                                                \
+    * directory_arg    - const char*                                           \
+    * function_arg     - expression                                            \
+    .                                                                          \
+    these variables are available to be used as arguments in the function call \
+    for 'function_arg':                                                        \
+    * file_name        - const char*                                           \
+    * file_path        - const char*                                           \
+  */                                                                           \
+  do {                                                                         \
+    const char* _dir = directory_arg;                                          \
+                                                                               \
+    DIR* _dir_handle = opendir(_dir);                                          \
+    struct dirent* _dirent;                                                    \
+                                                                               \
+    if (!_dir_handle) {                                                        \
+      log_error("Could not open folder at %s", _dir);                          \
+      break;                                                                   \
+    }                                                                          \
+                                                                               \
+    while ((_dirent = readdir(_dir_handle)) != NULL) {                         \
+      if (_dirent->d_name[0] == '.') {                                         \
+        continue;                                                              \
+      }                                                                        \
+      const char* file_name = _dirent->d_name;                                 \
+      char* _file_path = malloc(strlen(_dir) + 1 + strlen(file_name) + 1);     \
+      strcpy(_file_path, _dir);                                                \
+      strcat(_file_path, "/");                                                 \
+      strcat(_file_path, file_name);                                           \
+      const char* file_path = _file_path;                                      \
+      function_arg;                                                            \
+      free(_file_path);                                                        \
+    }                                                                          \
+    closedir(_dir_handle);                                                     \
+  } while (0)
+
 #define rom_load(namespace_arg, directory_arg, function_arg)                                            \
+  /*                                                                                                    \
+    calls 'function_arg' for every top level file or directory in                                       \
+    'directory_arg' (which is relative to rom directory root) for every                                 \
+    namespace 'namespace_arg' in all loaded mods                                                        \
+    .                                                                                                   \
+    parameters:                                                                                         \
+    * namespace_arg    - const char*                                                                    \
+    * directory_arg    - const char*                                                                    \
+    * function_arg     - expression                                                                     \
+    .                                                                                                   \
+    these variables are available to be used as arguments in the function call                          \
+    for 'function_arg':                                                                                 \
+    * mod_name         - const char*                                                                    \
+    * file_name        - const char*                                                                    \
+    * file_path        - const char*                                                                    \
+  */                                                                                                    \
   do {                                                                                                  \
     const char* _ns = namespace_arg;                                                                    \
     const char* _dir = directory_arg;                                                                   \
@@ -53,30 +98,10 @@ int save_read(const char* dir, const char* file, const char* ext, char** out);
       strcat(_rom_path, _modent->name);                                                                 \
       strcat(_rom_path, "/data/endian/rom/");                                                           \
       strcat(_rom_path, _dir);                                                                          \
-      strcat(_rom_path, "/");                                                                           \
                                                                                                         \
-      DIR* _dir_handle = opendir(_rom_path);                                                            \
-      struct dirent* _dirent;                                                                           \
+      const char* mod_name = _modent->name;                                                             \
                                                                                                         \
-      if (!_dir_handle) {                                                                               \
-        log_error("Could not open folder at %s", _rom_path);                                            \
-        break;                                                                                          \
-      }                                                                                                 \
-                                                                                                        \
-      while ((_dirent = readdir(_dir_handle)) != NULL) {                                                \
-        if (_dirent->d_name[0] == '.') {                                                                \
-          continue;                                                                                     \
-        }                                                                                               \
-        const char* file_name = _dirent->d_name;                                                        \
-        char* _file_path = malloc(strlen(_rom_path) + strlen(file_name) + 1);                           \
-        strcpy(_file_path, _rom_path);                                                                  \
-        strcat(_file_path, file_name);                                                                  \
-        const char* file_path = _file_path;                                                             \
-        function_arg;                                                                                   \
-        free(_file_path);                                                                               \
-      }                                                                                                 \
-      closedir(_dir_handle);                                                                            \
-      free(_rom_path);                                                                                  \
+      dir_load(_rom_path, function_arg);                                                                \
     }                                                                                                   \
     free(_mods_path);                                                                                   \
   } while (0)
