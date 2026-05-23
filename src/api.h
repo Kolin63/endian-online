@@ -131,6 +131,13 @@ struct api {
   // const struct command* command_get(char* name);
   const struct command* (*command_get)(char* name);
 
+  // Moves all contents of file into a buffer. buf must be freed after use
+  // char* fileio_read_all(FILE* file);
+  char* (*fileio_read_all)(FILE* file);
+
+  // jsmntok_t* fileio_read_json(const char* json);
+  jsmntok_t* (*fileio_read_json)(const char* json);
+
   // struct bot* bot_get_global();
   struct bot* (*bot_get_global)();
 

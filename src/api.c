@@ -13,6 +13,7 @@
 #include "command.h"
 #include "plugin.h"
 #include "namespace.h"
+#include "fileio.h"
 
 static struct api* global;
 
@@ -47,6 +48,9 @@ void api_init() {
   global->function_get = function_get;
   global->get_command_registry = (void*)regman_get_command;
   global->command_get = command_get;
+
+  global->fileio_read_all = fileio_read_all;
+  global->fileio_read_json = fileio_read_json;
 
   global->bot_get_global = bot_get_global;
 
