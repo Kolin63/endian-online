@@ -102,6 +102,8 @@ int save_read(const char* dir, const char* file, const char* ext, char** out);
       const char* mod_name = _modent->name;                                                             \
                                                                                                         \
       dir_load(_rom_path, function_arg);                                                                \
+                                                                                                        \
+      free(_rom_path);                                                                                  \
     }                                                                                                   \
     free(_mods_path);                                                                                   \
   } while (0)
