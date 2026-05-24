@@ -32,7 +32,7 @@ void user_init_fail(struct discord* client, struct discord_response* resp) {
   user_init_status = USER_INIT_STATUS_FAIL;
 }
 
-struct user* user_init(unsigned long long uuid) {
+struct user* user_init(unsigned long uuid) {
   pthread_rwlock_wrlock(&user_lock);
 
   while (user_init_status != USER_INIT_STATUS_IDLE);
@@ -74,7 +74,7 @@ struct user* user_init(unsigned long long uuid) {
   strcpy(user->username, sync.username);
 
   char* avatar = malloc(128);
-  snprintf(avatar, 128, "https://cdn.discordapp.com/avatars/%lli/%s", uuid, sync.avatar);
+  snprintf(avatar, 128, "https://cdn.discordapp.com/avatars/%zi/%s", uuid, sync.avatar);
   avatar = realloc(avatar, strlen(avatar) + 1);
   user->avatar = avatar;
 
@@ -87,7 +87,7 @@ struct user* user_init(unsigned long long uuid) {
   return user;
 }
 
-struct user* user_get(unsigned long long uuid) {
+struct user* user_get(unsigned long uuid) {
   pthread_rwlock_rdlock(&user_lock);
   struct user* key = &(struct user){.uuid = uuid};
   struct user** ret_ptr = registry_ktov(regman_get_user(), &key);
@@ -119,10 +119,10 @@ void user_cleanup(struct user** elem) {
   free(user);
 }
 
-void uuid_to_string(unsigned long long uuid, char* buf) {
-  snprintf(buf, UUID_STR_LEN, "%lli", uuid);
+void uuid_to_string(unsigned long uuid, char* buf) {
+  snprintf(buf, UUID_STR_LEN, "%zi", uuid);
 }
 
-unsigned long long string_to_uuid(const char* str) {
+unsigned long string_to_uuid(const char* str) {
   return strtoul(str, NULL, 10);
 }

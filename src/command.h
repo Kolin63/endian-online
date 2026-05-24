@@ -28,7 +28,7 @@ struct command {
   char* description;
   char* callback;
   struct command_options* options;
-  unsigned long long default_member_permissions;
+  unsigned long default_member_permissions;
 };
 
 void command_load(const struct discord_ready* event, const char* command_path,
