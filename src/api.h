@@ -183,14 +183,14 @@ struct api {
   // initializes user
   // returns pointer to user in registry
   //
-  // struct user* user_init(unsigned long uuid);
-  struct user* (*user_init)(unsigned long uuid);
+  // struct user* user_init(unsigned long long uuid);
+  struct user* (*user_init)(unsigned long long uuid);
 
   // returns pointer to user in registry
   // initializes the user if it is not in registry
   //
-  // struct user* user_get(unsigned long uuid);
-  struct user* (*user_get)(unsigned long uuid);
+  // struct user* user_get(unsigned long long uuid);
+  struct user* (*user_get)(unsigned long long uuid);
 
   // int user_cmp(struct user* const* a, struct user* const* b);
   int (*user_cmp)(struct user* const* a, struct user* const* b);
@@ -198,16 +198,16 @@ struct api {
   // void user_cleanup(struct user** elem);
   void (*user_cleanup)(struct user** elem);
 
-  // converts uuid (unsigned long) to string.
+  // converts uuid (unsigned long long) to string.
   // string should be of length UUID_STR_LEN
   //
-  // void uuid_to_string(unsigned long uuid, char* buf);
-  void (*uuid_to_string)(unsigned long uuid, char* buf);
+  // void uuid_to_string(unsigned long long uuid, char* buf);
+  void (*uuid_to_string)(unsigned long long uuid, char* buf);
 
-  // converts string to uuid (unsigned long)
+  // converts string to uuid (unsigned long long)
   //
-  // unsigned long string_to_uuid(const char* str);
-  unsigned long (*string_to_uuid)(const char* str);
+  // unsigned long long string_to_uuid(const char* str);
+  unsigned long long (*string_to_uuid)(const char* str);
 
   // writes to save file. returns 0 if ok.
   // dir does not need a trailing slash
