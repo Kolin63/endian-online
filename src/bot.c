@@ -15,7 +15,6 @@
 #include "function.h"
 #include "log.h"
 #include "mod_loader.h"
-#include "sds.h"
 
 static struct bot* global_bot = NULL;
 
@@ -97,8 +96,9 @@ void bot_init() {
   global_bot->instance_dir = cli_args->instance_dir;
 
   char token[128];
-  sds token_file_path = sdsnew(global_bot->instance_dir);
-  token_file_path = sdscat(token_file_path, "/token.txt");
+  char* token_file_path = malloc(strlen(global_bot->instance_dir) + 10 + 1);
+  strcpy(token_file_path, global_bot->instance_dir);
+  strcat(token_file_path, "/token.txt");
 
   FILE* token_file = fopen(token_file_path, "r");
 
@@ -122,7 +122,7 @@ void bot_init() {
 
   global_bot->discord_bot = discord_init(token);
 
-  sdsfree(token_file_path);
+  free(token_file_path);
 
   // open logging files
   char log_time_name[128];
@@ -134,22 +134,23 @@ void bot_init() {
   strftime(log_time_name, sizeof(log_time_name), "/logs/%Y-%m-%d-%H:%M:%S", tm_time);
 
   // setup logging from endian
-  sds log_file_path = sdsnew(global_bot->instance_dir);
-  log_file_path = sdscat(log_file_path, log_time_name);
-  log_file_path = sdscat(log_file_path, ".log");
+  char* log_file_path = malloc(strlen(global_bot->instance_dir) + strlen(log_time_name) + 4 + 1);
+  strcpy(log_file_path, global_bot->instance_dir);
+  strcat(log_file_path, log_time_name);
+  strcat(log_file_path, ".log");
 
   log_file = fopen(log_file_path, "w");
 
   if (!log_file) {
     log_error("Could not open file for Endian logging at %s", log_file_path);
-    sdsfree(log_file_path);
+    free(log_file_path);
     abort_cleanup(EXIT_FAILURE);
   }
 
   log_add_fp(log_file, LOG_TRACE);
   log_set_lock(log_lock_func, NULL);
 
-  sdsfree(log_file_path);
+  free(log_file_path);
 
   // setup logging from concord
   if (cli_args->verbose == 0) {

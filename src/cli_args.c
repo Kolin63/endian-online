@@ -6,7 +6,6 @@
 #include <string.h>
 
 #include "log.h"
-#include "sds.h"
 #include "exit.h"
 
 static struct cli_args* global = NULL;
@@ -17,11 +16,11 @@ void print_usage(const char* program_name) {
 
 void cli_args_init() {
   global = malloc(sizeof(struct cli_args));
-  global->instance_dir = sdsempty();
+  global->instance_dir = NULL;
 }
 
 void cli_args_cleanup() {
-  sdsfree(global->instance_dir);
+  if (global->instance_dir != NULL) free(global->instance_dir);
   free(global);
 }
 
@@ -44,7 +43,8 @@ void cli_args_parse(int argc, const char** argv) {
         }
       }
     } else {  // not a flag; the instance name
-      global->instance_dir = sdscpy(global->instance_dir, argv[i]);
+      global->instance_dir = malloc(strlen(argv[i]) + 1);
+      strcpy(global->instance_dir, argv[i]);
       req_args_passed++;
     }
   }  // done parsing args
@@ -55,20 +55,21 @@ void cli_args_parse(int argc, const char** argv) {
   }
 
   if (global->default_root == true) {
-    sds buf = sdsnew(global->instance_dir);
+    char* buf = global->instance_dir;
 #ifdef __linux__
     const char* home = getenv("HOME");
     if (!home) {
       log_error("Error: could not get value of $HOME");
       abort_cleanup(EXIT_FAILURE);
     }
-    global->instance_dir = sdscpy(global->instance_dir, home);
-    global->instance_dir = sdscat(global->instance_dir, "/.local/share/endian/");
+    global->instance_dir = malloc(strlen(home) + 21 + strlen(buf) + 1);
+    strcpy(global->instance_dir, home);
+    strcat(global->instance_dir, "/.local/share/endian/");
 #else
     static_assert(0, "Default root not supported on this OS");
 #endif
-    global->instance_dir = sdscat(global->instance_dir, buf);
-    sdsfree(buf);
+    strcat(global->instance_dir, buf);
+    free(buf);
   }
 }
 

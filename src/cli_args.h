@@ -1,12 +1,10 @@
 #ifndef ENDIAN_CLI_ARGS_H_
 #define ENDIAN_CLI_ARGS_H_
 
-#include "sds.h"
-
 struct cli_args {
   bool default_root;
   bool verbose;
-  sds instance_dir;
+  char* instance_dir;
 };
 
 void cli_args_init();

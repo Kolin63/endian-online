@@ -3,16 +3,18 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <assert.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "bot.h"
 #include "fileio.h"
 #include "log.h"
-#include "sds.h"
 
 int save_write(const char* dir, const char* file, const char* ext, const char* content) {
-  sds path = sdsnew(bot_get_global()->instance_dir);
-  path = sdscat(path, "/save/");
-  path = sdscat(path, dir);
+  char* path = malloc(strlen(bot_get_global()->instance_dir) + 6 + strlen(dir) + 1 + strlen(file) + 1 + strlen(ext) + 1);
+  strcpy(path, bot_get_global()->instance_dir);
+  strcat(path, "/save/");
+  strcat(path, dir);
 
   // check that the directory exists
   FILE* dir_check = fopen(path, "r");
@@ -22,10 +24,10 @@ int save_write(const char* dir, const char* file, const char* ext, const char* c
     fclose(dir_check);
   }
 
-  path = sdscat(path, "/");
-  path = sdscat(path, file);
-  path = sdscat(path, ".");
-  path = sdscat(path, ext);
+  strcat(path, "/");
+  strcat(path, file);
+  strcat(path, ".");
+  strcat(path, ext);
 
   // check that the file exists
   FILE* file_handle = fopen(path, "w");
@@ -36,17 +38,18 @@ int save_write(const char* dir, const char* file, const char* ext, const char* c
 
   fprintf(file_handle, "%s", content);
   fclose(file_handle);
-  sdsfree(path);
+  free(path);
   return 0;
 }
 
 // predir should be "save" or "mods/modname/data/rom"
 int save_or_rom_read(const char* predir, const char* dir, const char* file, const char* ext, char** out) {
-  sds path = sdsnew(bot_get_global()->instance_dir);
-  path = sdscat(path, "/");
-  path = sdscat(path, predir);
-  path = sdscat(path, "/");
-  path = sdscat(path, dir);
+  char* path = malloc(strlen(bot_get_global()->instance_dir) + 1 + strlen(predir) + 1 + strlen(dir) + 1);
+  strcpy(path, bot_get_global()->instance_dir);
+  strcat(path, "/");
+  strcat(path, predir);
+  strcat(path, "/");
+  strcat(path, dir);
 
   // check that the directory exists
   FILE* dir_check = fopen(path, "r");
@@ -56,10 +59,10 @@ int save_or_rom_read(const char* predir, const char* dir, const char* file, cons
   }
   fclose(dir_check);
 
-  path = sdscat(path, "/");
-  path = sdscat(path, file);
-  path = sdscat(path, ".");
-  path = sdscat(path, ext);
+  strcat(path, "/");
+  strcat(path, file);
+  strcat(path, ".");
+  strcat(path, ext);
 
   // check that the file exists
   FILE* file_handle = fopen(path, "r");
@@ -71,7 +74,7 @@ int save_or_rom_read(const char* predir, const char* dir, const char* file, cons
   assert(*out == NULL);
   *out = fileio_read_all(file_handle);
   fclose(file_handle);
-  sdsfree(path);
+  free(path);
   return 0;
 }
 

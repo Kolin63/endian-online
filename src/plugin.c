@@ -7,7 +7,6 @@
 #include "log.h"
 #include "registry.h"
 #include "regman.h"
-#include "sds.h"
 
 void plugin_load(const char* plugin_path, const char* namespace_name, const char* mod_name, const char* plugin_name) {
   if (strcmp(plugin_name, "src") == 0) return;
@@ -20,10 +19,11 @@ void plugin_load(const char* plugin_path, const char* namespace_name, const char
   }
 
   // without file extension
-  sds clean_name = sdsnew(plugin_name);
+  char* clean_name = malloc(strlen(plugin_name) + 1);
+  strcpy(clean_name, plugin_name);
   char* dot_finder = clean_name;
   while (*dot_finder != '\0' && *dot_finder != '.') dot_finder++;
-  sdsrange(clean_name, 0, dot_finder - clean_name - 1);
+  *dot_finder = '\0';
 
   struct plugin plugin;
   plugin.plugin = dl;
@@ -37,7 +37,7 @@ void plugin_load(const char* plugin_path, const char* namespace_name, const char
   }
   log_info("Loading plugin %s:%s:%s", mod_name, namespace_name, plugin_name);
 
-  sdsfree(clean_name);
+  free(clean_name);
 }
 
 const struct plugin* plugin_get(char* namespace, char* name) {
