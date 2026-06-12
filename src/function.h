@@ -10,6 +10,7 @@ enum function_type {
   FT_LOAD,
   FT_FILLOUT,
   FT_EXPORT,
+  FT_TO_JSON,
   FT_DATA,
   FT_CLEANUP,
 };

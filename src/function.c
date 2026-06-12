@@ -36,6 +36,7 @@ int function_fillout(const char* namespace_name, const char* mod_name,
       else if (strcmp(val, "LOAD") == 0) func->type = FT_LOAD;
       else if (strcmp(val, "FILLOUT") == 0) func->type = FT_FILLOUT;
       else if (strcmp(val, "EXPORT") == 0) func->type = FT_EXPORT;
+      else if (strcmp(val, "TO_JSON") == 0) func->type = FT_TO_JSON;
       else if (strcmp(val, "DATA") == 0) func->type = FT_DATA;
       else if (strcmp(val, "CLEANUP") == 0) func->type = FT_CLEANUP;
       else {
